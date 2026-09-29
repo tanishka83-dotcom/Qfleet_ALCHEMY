@@ -1,0 +1,232 @@
+/* QFleet Phase 4B — Functional Landing Page Styles
+   Plain layout, default system fonts, no design flourishes. */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  color: #222;
+  background: #fafafa;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header {
+  border-bottom: 2px solid #333;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.25rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.25rem;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.stat-card {
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  text-align: center;
+  background: #fff;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111;
+}
+
+/* Fuel and vessel class lists */
+#fuel-list, #vessel-class-list {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.route-select-wrapper {
+  margin: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.route-select-wrapper select {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 4px;
+  max-width: 100%;
+}
+
+/* Tables */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.4rem 0.6rem;
+  text-align: right;
+}
+
+th {
+  background: #eee;
+  font-weight: 600;
+  text-align: center;
+}
+
+td:first-child, td:nth-child(2) {
+  text-align: left;
+}
+
+/* Failed row styling */
+tr.row-failed td {
+  color: #999;
+}
+
+td.failed-message {
+  color: #b00;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Section notes */
+.section-note {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.75rem;
+}
+
+/* Limitations box */
+.limitations-box {
+  border: 2px solid #c00;
+  background: #fff8f8;
+  padding: 1rem;
+}
+
+.limitations-box ul {
+  padding-left: 1.5rem;
+}
+
+.limitations-box li {
+  margin-bottom: 0.4rem;
+}
+
+/* TODO_VERIFY list */
+.todo-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.todo-item {
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.todo-item:last-child {
+  border-bottom: none;
+}
+
+.todo-id {
+  font-weight: 700;
+  color: #c60;
+}
+
+/* Dashboard link */
+.dashboard-link {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #333;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.dashboard-link:hover {
+  background: #333;
+  color: #fff;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid #ccc;
+  padding-top: 1rem;
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  color: #777;
+  text-align: center;
+}
+
+/* Responsive: 390px */
+@media (max-width: 600px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 0.3rem 0.4rem;
+  }
+}

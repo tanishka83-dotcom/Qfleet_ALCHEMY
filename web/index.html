@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QFleet — Maritime Fleet Fuel Optimisation</title>
+  <meta name="description" content="QFleet: AI/ML and Quantum-Inspired Optimisation for Maritime Fleet Fuel Efficiency and Emissions (SIH26138).">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>QFleet: Maritime Fleet Fuel Optimisation</h1>
+    <p class="subtitle">SIH Problem ID: SIH26138 — AI/ML &amp; Quantum-Inspired Optimisation for Maritime Fleet Fuel Efficiency and Emissions</p>
+  </header>
+
+  <main>
+    <!-- Section 1: Project Summary -->
+    <section id="project-summary">
+      <h2>How It Addresses the Problem</h2>
+      <ol id="how-it-addresses">
+        <li>Predicts fuel use from voyage conditions with a surrogate model (synthetic data)</li>
+        <li>Assigns vessel, speed and fuel to each voyage to minimize cost, emissions and delay</li>
+        <li>Compares alternative fuels under a carbon price</li>
+        <li>Checks every plan against CO2 cap, class quotas, cargo capacity and deadlines, and reports when a method fails them</li>
+        <li>Benchmarks quantum-inspired methods against an exact solver, including where they lose</li>
+      </ol>
+
+      <div id="summary-stats" class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Vessels</span>
+          <span class="stat-value" id="stat-vessels">--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Routes</span>
+          <span class="stat-value" id="stat-routes">--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Fuels</span>
+          <span class="stat-value" id="stat-fuels">--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Scenarios</span>
+          <span class="stat-value" id="stat-scenarios">--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Optimisation Runs</span>
+          <span class="stat-value" id="stat-opt-runs">--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">TODO_VERIFY Items</span>
+          <span class="stat-value" id="stat-todo-count">--</span>
+        </div>
+      </div>
+
+      <div id="fuel-list">
+        <strong>Fuels in grid:</strong> <span id="fuel-names">--</span>
+      </div>
+      <div id="vessel-class-list">
+        <strong>Vessel classes:</strong> <span id="vessel-classes">--</span>
+      </div>
+    </section>
+
+    <!-- Section 2: Benchmark Table -->
+    <section id="benchmark-section">
+      <h2>Benchmark Results</h2>
+      <p class="section-note">All values read from <code>benchmark_results.csv</code>. Methods with 0% feasibility show "Failed: no feasible plan" — no cost figure is displayed.</p>
+      <div class="table-wrapper">
+        <table id="benchmark-table">
+          <thead>
+            <tr>
+              <th>Instance</th>
+              <th>Algorithm</th>
+              <th>Mean Objective ($)</th>
+              <th>Std ($)</th>
+              <th>Best ($)</th>
+              <th>Worst ($)</th>
+              <th>Gap to Ref (%)</th>
+              <th>Reference Type</th>
+              <th>Feas. Rate (%)</th>
+              <th>n Feasible</th>
+              <th>Runtime (s)</th>
+            </tr>
+          </thead>
+          <tbody id="benchmark-tbody">
+            <tr><td colspan="11">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 3: Statistical Tests -->
+    <section id="statistical-tests-section">
+      <h2>Wilcoxon Signed-Rank Tests</h2>
+      <p class="section-note">Pairwise comparisons with Holm correction. A positive mean_diff means the first method is worse. Results include cases where QI-EA loses.</p>
+      <div class="table-wrapper">
+        <table id="stats-table">
+          <thead>
+            <tr>
+              <th>Instance</th>
+              <th>Comparison</th>
+              <th>Mean Diff ($)</th>
+              <th>Wilcoxon p (Holm)</th>
+              <th>Significant (α=0.05)</th>
+            </tr>
+          </thead>
+          <tbody id="stats-tbody">
+            <tr><td colspan="5">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 4: Fuel Comparison for Every Route -->
+    <section id="route-fuel-section">
+      <h2>Alternative Fuel Comparison by Route</h2>
+      <p class="section-note">Estimated fuel consumption, operational fuel cost, WTW CO₂ emissions, and total cost under carbon pricing ($100/t CO₂eq) for Post-Panamax at 18.0 knots.</p>
+      <div class="route-select-wrapper">
+        <label for="route-select"><strong>Select Voyage Route:</strong></label>
+        <select id="route-select">
+          <option value="">Loading routes…</option>
+        </select>
+      </div>
+      <div class="table-wrapper" style="margin-top: 1rem;">
+        <table id="route-fuel-table">
+          <thead>
+            <tr>
+              <th>Fuel Type</th>
+              <th>Fuel Consumed (t)</th>
+              <th>Fuel Cost ($)</th>
+              <th>CO₂ WTW (t)</th>
+              <th>Carbon Tax ($)</th>
+              <th>Total Cost ($)</th>
+            </tr>
+          </thead>
+          <tbody id="route-fuel-tbody">
+            <tr><td colspan="6">Select a route above</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 5: Limitations -->
+    <section id="limitations-section">
+      <h2>Limitations</h2>
+      <div class="limitations-box">
+        <ul id="limitations-list">
+          <li>All voyage and fleet data is <strong>synthetic</strong> (parameterised physics generator).</li>
+          <li><span id="lim-todo-count">--</span> TODO_VERIFY items remain unresolved (flagged in <code>config.py</code>).</li>
+          <li>MILP finds proven optima on all three instances at this scale.</li>
+          <li>QI-EA and SQA produce no feasible plans on Medium and Large instances.</li>
+          <li>QI-EA, GA, and SQA are <strong>quantum-inspired classical algorithms</strong> — no quantum hardware or qubits are used.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 6: TODO_VERIFY Items (visible) -->
+    <section id="todo-verify-section">
+      <h2>TODO_VERIFY Items</h2>
+      <p class="section-note">Each item below is a value that could not be confirmed against a single authoritative primary source. All are visible — none are hidden.</p>
+      <div id="todo-verify-list" class="todo-list">
+        <p>Loading…</p>
+      </div>
+    </section>
+
+    <!-- Section 7: Dashboard Link -->
+    <section id="dashboard-link-section">
+      <h2>Full Dashboard</h2>
+      <p>
+        <a href="http://localhost:8501" class="dashboard-link" id="streamlit-link">
+          Open Streamlit Dashboard →
+        </a>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <p>QFleet — SIH26138 | Data source: <code>data/qfleet.db</code> (read-only) &amp; <code>benchmark_results.csv</code></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
