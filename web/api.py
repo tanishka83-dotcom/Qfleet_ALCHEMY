@@ -35,10 +35,19 @@ _ROOT = _WEB_DIR.parent
 _DB_PATH = _ROOT / "data" / "qfleet.db"
 _BENCH_CSV = _ROOT / "data" / "benchmark_results.csv"
 _STAT_CSV = _ROOT / "results" / "statistical_tests.csv"
+_PHASE5_V2_CSV = _ROOT / "results" / "phase5_v2_benchmark.csv"
 
 # Allow importing config for TODO_VERIFY_ITEMS
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
+
+try:
+    import config as _cfg
+    from phase5_todo_verify import register_phase5_todo_items
+
+    register_phase5_todo_items(_cfg)
+except Exception:
+    pass
 
 
 # ---------------------------------------------------------------------------
@@ -204,6 +213,15 @@ def _build_benchmark() -> dict:
     }
 
 
+def _build_phase5_v2_benchmark() -> dict:
+    """Read Phase 5 results from CSV without writing to the production DB."""
+    rows = []
+    if _PHASE5_V2_CSV.exists():
+        with open(_PHASE5_V2_CSV, newline="", encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+    return {"rows": rows, "source": os.path.relpath(_PHASE5_V2_CSV, _ROOT)}
+
+
 # ---------------------------------------------------------------------------
 # /api/todo_verify
 # ---------------------------------------------------------------------------
@@ -212,6 +230,9 @@ def _build_todo_verify() -> dict:
     """Load TODO_VERIFY_ITEMS from config module."""
     try:
         import config as _cfg
+        from phase5_todo_verify import register_phase5_todo_items
+
+        register_phase5_todo_items(_cfg)
         items = list(_cfg.TODO_VERIFY_ITEMS)
     except Exception:
         items = []
@@ -318,6 +339,8 @@ class QFleetHandler(SimpleHTTPRequestHandler):
             self._json_response(_build_summary())
         elif path == "/api/benchmark":
             self._json_response(_build_benchmark())
+        elif path == "/api/phase5_v2_benchmark":
+            self._json_response(_build_phase5_v2_benchmark())
         elif path == "/api/todo_verify":
             self._json_response(_build_todo_verify())
         elif path == "/api/routes_fuel_comparison":
@@ -354,6 +377,7 @@ def run_server(port: int = 8080):
     print(f"QFleet landing page: http://127.0.0.1:{port}")
     print(f"API endpoints:       http://127.0.0.1:{port}/api/summary")
     print(f"                     http://127.0.0.1:{port}/api/benchmark")
+    print(f"                     http://127.0.0.1:{port}/api/phase5_v2_benchmark")
     print(f"                     http://127.0.0.1:{port}/api/todo_verify")
     print("Press Ctrl+C to stop.")
     try:

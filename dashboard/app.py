@@ -26,6 +26,7 @@ from dashboard.views import (
     page3_benchmark,
     page4_carbon_fuels,
     page5_architecture,
+    page6_plan_fleet,
 )
 
 # Page configuration
@@ -57,6 +58,7 @@ def main() -> None:
             "3. Benchmark & Statistical Tests",
             "4. Fuels & Carbon Price Sensitivity",
             "5. Architecture & Honest Audit",
+            "6. Plan a Fleet (Interactive)",
         ],
         index=2,  # Default to Benchmark page
     )
@@ -81,6 +83,8 @@ def main() -> None:
         page4_carbon_fuels.render()
     elif page_selection.startswith("5."):
         page5_architecture.render()
+    elif page_selection.startswith("6."):
+        page6_plan_fleet.render()
 
 
 if __name__ == "__main__":

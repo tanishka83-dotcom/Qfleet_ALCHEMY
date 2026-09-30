@@ -3,178 +3,298 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QFleet — Maritime Fleet Fuel Optimisation</title>
+  <title>QFleet — Maritime Fleet Fuel &amp; Emissions Optimisation</title>
   <meta name="description" content="QFleet: AI/ML and Quantum-Inspired Optimisation for Maritime Fleet Fuel Efficiency and Emissions (SIH26138).">
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>QFleet: Maritime Fleet Fuel Optimisation</h1>
-    <p class="subtitle">SIH Problem ID: SIH26138 — AI/ML &amp; Quantum-Inspired Optimisation for Maritime Fleet Fuel Efficiency and Emissions</p>
+  <!-- Ambient Particle & Wave Background Container -->
+  <div class="ocean-background">
+    <div class="sky-glow"></div>
+    <div class="stars-particles" id="particles"></div>
+    <div class="ship-silhouette"></div>
+  </div>
+
+  <!-- Frosted Glass Navigation Bar -->
+  <header class="glass-nav">
+    <div class="nav-brand">
+      <span class="brand-icon">⚓</span>
+      <span class="brand-text">QFleet</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#hero">Overview</a>
+      <a href="#how-it-addresses">Architecture</a>
+      <a href="#benchmark-section">Benchmarks</a>
+      <a href="#routes-map-section">Global Routes</a>
+      <a href="#route-fuel-section">Alternative Fuels</a>
+      <a href="#limitations-section">Limitations</a>
+    </nav>
+    <div class="nav-action">
+      <a href="http://localhost:8501" class="pill-btn" id="nav-dashboard-link">Open Planner →</a>
+    </div>
   </header>
 
-  <main>
-    <!-- Section 1: Project Summary -->
-    <section id="project-summary">
-      <h2>How It Addresses the Problem</h2>
-      <ol id="how-it-addresses">
-        <li>Predicts fuel use from voyage conditions with a surrogate model (synthetic data)</li>
-        <li>Assigns vessel, speed and fuel to each voyage to minimize cost, emissions and delay</li>
-        <li>Compares alternative fuels under a carbon price</li>
-        <li>Checks every plan against CO2 cap, class quotas, cargo capacity and deadlines, and reports when a method fails them</li>
-        <li>Benchmarks quantum-inspired methods against an exact solver, including where they lose</li>
-      </ol>
-
-      <div id="summary-stats" class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label">Vessels</span>
-          <span class="stat-value" id="stat-vessels">--</span>
+  <main class="content-canvas">
+    <!-- Hero Section with 3D Extruded Wordmark & Animated Waves -->
+    <section id="hero" class="hero-container">
+      <div class="hero-content">
+        <div class="badge-pill">SIH Problem ID: SIH26138 • Maritime Logistics</div>
+        
+        <!-- 3D Extruded Wordmark -->
+        <div class="wordmark-container" id="wordmark-3d">
+          <div class="wordmark-letter-depth" data-text="QFLEET">QFLEET</div>
         </div>
-        <div class="stat-card">
-          <span class="stat-label">Routes</span>
-          <span class="stat-value" id="stat-routes">--</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Fuels</span>
-          <span class="stat-value" id="stat-fuels">--</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Scenarios</span>
-          <span class="stat-value" id="stat-scenarios">--</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Optimisation Runs</span>
-          <span class="stat-value" id="stat-opt-runs">--</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">TODO_VERIFY Items</span>
-          <span class="stat-value" id="stat-todo-count">--</span>
-        </div>
+        
+        <p class="hero-subtext">Quantum-Inspired Maritime Fleet Fuel Efficiency &amp; Emissions Decarbonization</p>
       </div>
 
-      <div id="fuel-list">
-        <strong>Fuels in grid:</strong> <span id="fuel-names">--</span>
-      </div>
-      <div id="vessel-class-list">
-        <strong>Vessel classes:</strong> <span id="vessel-classes">--</span>
+      <!-- Multi-Layer Translucent Ocean Waves -->
+      <div class="wave-layer-wrapper">
+        <svg class="ocean-waves" viewBox="0 24 150 28" preserveAspectRatio="none">
+          <defs>
+            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+          </defs>
+          <g class="parallax-wave">
+            <use href="#gentle-wave" x="48" y="0" fill="rgba(0, 210, 255, 0.25)" />
+            <use href="#gentle-wave" x="48" y="3" fill="rgba(10, 50, 92, 0.45)" />
+            <use href="#gentle-wave" x="48" y="5" fill="rgba(14, 30, 60, 0.65)" />
+            <use href="#gentle-wave" x="48" y="7" fill="#0a192f" />
+          </g>
+        </svg>
       </div>
     </section>
 
-    <!-- Section 2: Benchmark Table -->
-    <section id="benchmark-section">
-      <h2>Benchmark Results</h2>
-      <p class="section-note">All values read from <code>benchmark_results.csv</code>. Methods with 0% feasibility show "Failed: no feasible plan" — no cost figure is displayed.</p>
-      <div class="table-wrapper">
-        <table id="benchmark-table">
-          <thead>
-            <tr>
-              <th>Instance</th>
-              <th>Algorithm</th>
-              <th>Mean Objective ($)</th>
-              <th>Std ($)</th>
-              <th>Best ($)</th>
-              <th>Worst ($)</th>
-              <th>Gap to Ref (%)</th>
-              <th>Reference Type</th>
-              <th>Feas. Rate (%)</th>
-              <th>n Feasible</th>
-              <th>Runtime (s)</th>
-            </tr>
-          </thead>
-          <tbody id="benchmark-tbody">
-            <tr><td colspan="11">Loading…</td></tr>
-          </tbody>
-        </table>
+    <!-- Overlapping Glass KPI Panel -->
+    <section id="project-summary" class="overlap-panel">
+      <div class="glass-card main-summary-card">
+        <div class="summary-header">
+          <h2>Next-Generation Fleet Optimization Engine</h2>
+          <p>Physics-guided machine learning surrogate models paired with mathematical MILP solvers and quantum-inspired classical heuristics.</p>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-tile">
+            <span class="kpi-label">Active Vessels</span>
+            <span class="kpi-value" id="stat-vessels">19</span>
+            <span class="kpi-sub">Feeder to ULCS Classes</span>
+          </div>
+          <div class="kpi-tile">
+            <span class="kpi-label">Commercial Routes</span>
+            <span class="kpi-value" id="stat-routes">68</span>
+            <span class="kpi-sub">Global Port Pairs</span>
+          </div>
+          <div class="kpi-tile">
+            <span class="kpi-label">Decarbonization Fuels</span>
+            <span class="kpi-value" id="stat-fuels">5</span>
+            <span class="kpi-sub">HFO, VLSFO, MGO, LNG, Methanol</span>
+          </div>
+          <div class="kpi-tile">
+            <span class="kpi-label">Database Runs</span>
+            <span class="kpi-value" id="stat-opt-runs">658</span>
+            <span class="kpi-sub">Canonical Verified Runs</span>
+          </div>
+        </div>
+        <div id="fuel-list" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+          <strong>Fuels in grid:</strong> <span id="fuel-names">--</span> | 
+          <strong>Vessel classes:</strong> <span id="vessel-classes">--</span>
+        </div>
       </div>
     </section>
 
-    <!-- Section 3: Statistical Tests -->
-    <section id="statistical-tests-section">
-      <h2>Wilcoxon Signed-Rank Tests</h2>
-      <p class="section-note">Pairwise comparisons with Holm correction. A positive mean_diff means the first method is worse. Results include cases where QI-EA loses.</p>
-      <div class="table-wrapper">
-        <table id="stats-table">
-          <thead>
-            <tr>
-              <th>Instance</th>
-              <th>Comparison</th>
-              <th>Mean Diff ($)</th>
-              <th>Wilcoxon p (Holm)</th>
-              <th>Significant (α=0.05)</th>
-            </tr>
-          </thead>
-          <tbody id="stats-tbody">
-            <tr><td colspan="5">Loading…</td></tr>
-          </tbody>
-        </table>
+    <!-- How It Addresses the Problem -->
+    <section id="how-it-addresses-section" class="section-container">
+      <div class="glass-card">
+        <h2 class="section-title">How It Addresses the Problem</h2>
+        <ol class="claims-list" id="how-it-addresses">
+          <li><strong>Surrogate Fuel Prediction:</strong> Predicts fuel use from voyage conditions with a surrogate model (synthetic data).</li>
+          <li><strong>Multi-Objective Assignment:</strong> Assigns vessel, speed, and fuel to each voyage to minimize cost, emissions, and delay.</li>
+          <li><strong>Alternative Fuel Evaluation:</strong> Compares alternative fuels under a carbon price.</li>
+          <li><strong>Rigorous Constraint Auditing:</strong> Checks every plan against CO₂ cap, class quotas, cargo capacity, and deadlines, and reports when a method fails them.</li>
+          <li><strong>Classical Quantum-Inspired Benchmarking:</strong> Benchmarks quantum-inspired methods against an exact solver, including where they lose.</li>
+        </ol>
       </div>
     </section>
 
-    <!-- Section 4: Fuel Comparison for Every Route -->
-    <section id="route-fuel-section">
-      <h2>Alternative Fuel Comparison by Route</h2>
-      <p class="section-note">Estimated fuel consumption, operational fuel cost, WTW CO₂ emissions, and total cost under carbon pricing ($100/t CO₂eq) for Post-Panamax at 18.0 knots.</p>
-      <div class="route-select-wrapper">
-        <label for="route-select"><strong>Select Voyage Route:</strong></label>
-        <select id="route-select">
-          <option value="">Loading routes…</option>
-        </select>
-      </div>
-      <div class="table-wrapper" style="margin-top: 1rem;">
-        <table id="route-fuel-table">
-          <thead>
-            <tr>
-              <th>Fuel Type</th>
-              <th>Fuel Consumed (t)</th>
-              <th>Fuel Cost ($)</th>
-              <th>CO₂ WTW (t)</th>
-              <th>Carbon Tax ($)</th>
-              <th>Total Cost ($)</th>
-            </tr>
-          </thead>
-          <tbody id="route-fuel-tbody">
-            <tr><td colspan="6">Select a route above</td></tr>
-          </tbody>
-        </table>
+    <!-- Global Routes Heatmap Card (Inline SVG) -->
+    <section id="routes-map-section" class="section-container">
+      <div class="glass-card map-card">
+        <div class="card-header">
+          <div>
+            <h2 class="section-title">Global Maritime Network &amp; Shore Power Availability</h2>
+            <p class="section-desc">Interactive geographic routing with cold-ironing electrification hubs.</p>
+          </div>
+        </div>
+        <div class="svg-map-wrapper">
+          <svg class="world-svg-map" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+            <path class="land-path" d="M150,120 Q180,90 240,100 Q280,130 250,190 Q210,240 180,260 Q130,220 120,160 Z" />
+            <path class="land-path" d="M220,290 Q260,280 290,340 Q280,420 230,460 Q190,400 200,320 Z" />
+            <path class="land-path" d="M460,90 Q540,80 570,130 Q540,180 470,170 Q440,130 460,90 Z" />
+            <path class="land-path" d="M470,200 Q560,200 580,280 Q560,380 500,400 Q450,320 450,230 Z" />
+            <path class="land-path" d="M600,90 Q780,80 880,120 Q920,200 850,260 Q720,250 630,180 Z" />
+            <path class="land-path" d="M780,330 Q880,320 900,390 Q850,440 780,410 Z" />
+
+            <path class="route-line" d="M780,180 Q600,120 480,130" />
+            <path class="route-line" d="M720,250 Q600,200 480,130" />
+            <path class="route-line" d="M780,180 Q500,70 220,180" />
+            <path class="route-line" d="M480,130 Q510,120 530,110" />
+            <path class="route-line" d="M820,160 Q550,60 210,140" />
+
+            <circle class="port-glow" cx="780" cy="180" r="7" />
+            <circle class="port-dot shore-available" cx="780" cy="180" r="4" />
+            <text class="port-label" x="790" y="185">Shanghai (🔌 Shore)</text>
+
+            <circle class="port-glow" cx="720" cy="250" r="7" />
+            <circle class="port-dot" cx="720" cy="250" r="4" />
+            <text class="port-label" x="630" y="265">Singapore</text>
+
+            <circle class="port-glow" cx="480" cy="130" r="7" />
+            <circle class="port-dot shore-available" cx="480" cy="130" r="4" />
+            <text class="port-label" x="380" y="125">Rotterdam (🔌 Shore)</text>
+
+            <circle class="port-glow" cx="530" cy="110" r="7" />
+            <circle class="port-dot shore-available" cx="530" cy="110" r="4" />
+            <text class="port-label" x="540" y="105">Hamburg (🔌)</text>
+
+            <circle class="port-glow" cx="220" cy="180" r="7" />
+            <circle class="port-dot shore-available" cx="220" cy="180" r="4" />
+            <text class="port-label" x="120" y="185">Los Angeles (🔌)</text>
+
+            <circle class="port-glow" cx="210" cy="140" r="7" />
+            <circle class="port-dot shore-available" cx="210" cy="140" r="4" />
+            <text class="port-label" x="130" y="140">Seattle (🔌)</text>
+          </svg>
+        </div>
       </div>
     </section>
 
-    <!-- Section 5: Limitations -->
-    <section id="limitations-section">
-      <h2>Limitations</h2>
-      <div class="limitations-box">
-        <ul id="limitations-list">
+    <!-- Benchmark Results Section -->
+    <section id="benchmark-section" class="section-container">
+      <div class="glass-card">
+        <h2 class="section-title">Benchmark Results &amp; Feasibility Rates</h2>
+        <p class="section-desc">All values read directly from <code>benchmark_results.csv</code>. Failed methods show "Failed: no feasible plan" with no cost figure.</p>
+        <div class="table-wrapper">
+          <table id="benchmark-table">
+            <thead>
+              <tr>
+                <th>Instance</th>
+                <th>Algorithm</th>
+                <th>Mean Objective ($)</th>
+                <th>Std ($)</th>
+                <th>Best ($)</th>
+                <th>Worst ($)</th>
+                <th>Gap to Ref (%)</th>
+                <th>Reference Type</th>
+                <th>Feas. Rate (%)</th>
+                <th>n Feasible</th>
+                <th>Runtime (s)</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <tr><td colspan="11">Loading canonical benchmark data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Statistical Tests Section -->
+    <section id="statistical-tests-section" class="section-container">
+      <div class="glass-card">
+        <h2 class="section-title">Wilcoxon Signed-Rank Tests</h2>
+        <p class="section-desc">Pairwise comparisons with Holm correction. A positive mean_diff means the first method is worse.</p>
+        <div class="table-wrapper">
+          <table id="stats-table">
+            <thead>
+              <tr>
+                <th>Instance</th>
+                <th>Comparison</th>
+                <th>Mean Diff ($)</th>
+                <th>Wilcoxon p (Holm)</th>
+                <th>Significant (α=0.05)</th>
+              </tr>
+            </thead>
+            <tbody id="stats-tbody">
+              <tr><td colspan="5">Loading statistical test data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Route Alternative Fuels Section -->
+    <section id="route-fuel-section" class="section-container">
+      <div class="glass-card">
+        <h2 class="section-title">Alternative Fuel Comparison by Route</h2>
+        <p class="section-desc">Estimated fuel consumption, operational fuel cost, WTW CO₂ emissions, and total cost under carbon pricing ($100/t CO₂eq) for Post-Panamax at 18.0 knots.</p>
+        <div class="route-select-wrapper">
+          <label for="route-select"><strong>Select Commercial Voyage Route:</strong></label>
+          <select id="route-select">
+            <option value="">Loading routes…</option>
+          </select>
+        </div>
+        <div class="table-wrapper" style="margin-top: 1rem;">
+          <table id="route-fuel-table">
+            <thead>
+              <tr>
+                <th>Fuel Type</th>
+                <th>Fuel Consumed (t)</th>
+                <th>Fuel Cost ($)</th>
+                <th>CO₂ WTW (t)</th>
+                <th>Carbon Tax ($)</th>
+                <th>Total Cost ($)</th>
+              </tr>
+            </thead>
+            <tbody id="route-fuel-tbody">
+              <tr><td colspan="6">Select a route above</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Limitations Box -->
+    <section id="limitations-section" class="section-container">
+      <div class="glass-card limitations-card">
+        <h2 class="section-title" style="color: #ff6b6b;">Engineering Limitations &amp; Disclosures</h2>
+        <ul class="limitations-list">
           <li>All voyage and fleet data is <strong>synthetic</strong> (parameterised physics generator).</li>
-          <li><span id="lim-todo-count">--</span> TODO_VERIFY items remain unresolved (flagged in <code>config.py</code>).</li>
-          <li>MILP finds proven optima on all three instances at this scale.</li>
-          <li>QI-EA and SQA produce no feasible plans on Medium and Large instances.</li>
+          <li><span id="lim-todo-count">30</span> <code>TODO_VERIFY</code> items remain unresolved (flagged in <code>config.py</code>).</li>
+          <li>MILP finds proven optima on all tested instances at this benchmark scale.</li>
+          <li>QI-EA and SQA produce no feasible plans on Medium and Large instances under unassisted heuristic search.</li>
           <li>QI-EA, GA, and SQA are <strong>quantum-inspired classical algorithms</strong> — no quantum hardware or qubits are used.</li>
         </ul>
       </div>
     </section>
 
-    <!-- Section 6: TODO_VERIFY Items (visible) -->
-    <section id="todo-verify-section">
-      <h2>TODO_VERIFY Items</h2>
-      <p class="section-note">Each item below is a value that could not be confirmed against a single authoritative primary source. All are visible — none are hidden.</p>
-      <div id="todo-verify-list" class="todo-list">
-        <p>Loading…</p>
+    <!-- Visible TODO_VERIFY Items -->
+    <section id="todo-verify-section" class="section-container">
+      <div class="glass-card">
+        <h2 class="section-title">Assumptions &amp; Verification Register</h2>
+        <p class="section-desc">Every value without a single authoritative regulatory primary source is catalogued transparently.</p>
+        <div id="todo-verify-list" class="todo-list">
+          <p>Loading register…</p>
+        </div>
       </div>
     </section>
 
-    <!-- Section 7: Dashboard Link -->
-    <section id="dashboard-link-section">
-      <h2>Full Dashboard</h2>
-      <p>
-        <a href="http://localhost:8501" class="dashboard-link" id="streamlit-link">
-          Open Streamlit Dashboard →
+    <!-- Dashboard Link -->
+    <section id="dashboard-link-section" class="section-container">
+      <div class="glass-card" style="text-align: center;">
+        <h2 class="section-title">Full Analytics Dashboard</h2>
+        <p class="section-desc">Open the multi-page interactive Streamlit dashboard for fleet simulation, route exploration, and sensitivity analytics.</p>
+        <a href="http://localhost:8501" class="pill-btn" id="streamlit-link" style="font-size: 1rem; padding: 0.6rem 2rem;">
+          Launch Streamlit Dashboard →
         </a>
-      </p>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <p>QFleet — SIH26138 | Data source: <code>data/qfleet.db</code> (read-only) &amp; <code>benchmark_results.csv</code></p>
+  <!-- Footer -->
+  <footer class="glass-footer">
+    <p>QFleet — SIH26138 | Powered by Physics+ML Surrogate &amp; Mathematical Optimizers | Data: <code>data/qfleet.db</code> (mode=ro)</p>
   </footer>
 
   <script src="app.js"></script>

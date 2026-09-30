@@ -34,6 +34,8 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
         for opt in route_options:
             opt_id = opt["option_id"]
             for v_idx, vessel in enumerate(problem.vessels):
+                if vessel.get("capacity_teu", vessel.get("teu_capacity", 0)) < route["cargo_demand_teu"]:
+                    continue
                 des_spd = float(vessel["design_speed_kn"])
                 for s_factor in problem.speed_bins:
                     spd = round(float(s_factor * des_spd), 4)
@@ -41,6 +43,8 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
                         key = (route["id"], opt_id, vessel["id"], spd, fuel["id"])
                         entry = problem._lookup_cache.get(key)
                         if entry:
+                            if entry["delay_days"] > 1e-4:
+                                continue
                             candidates.append({
                                 "r_idx": r_idx,
                                 "route_id": route["id"],
