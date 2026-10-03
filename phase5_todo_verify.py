@@ -9,6 +9,8 @@ PHASE5_TODO_VERIFY_ITEMS = [
     "TV-38 Port shore-power availability flags; verify port and terminal-specific infrastructure availability.",
     "TV-39 Port grid emissions factors; verify year, location, and electricity accounting boundary.",
     "TV-40 Port electricity tariffs; verify currency, tariff class, demand charges, and effective date.",
+    "TV-41 UNVERIFIED: results/phase5_v2_benchmark.csv generated prior to MILP regression fix; verify against updated runs.",
+    "TV-42 UNVERIFIED: results/phase5_v2_cap_sweep.csv generated prior to MILP regression fix; verify against updated runs.",
 ]
 
 

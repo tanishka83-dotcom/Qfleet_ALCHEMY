@@ -76,7 +76,7 @@ def test_problem_v2_route_options_and_shore_power():
 
 def test_problem_v2_shared_cap_repair():
     """Verify apply_shared_cap_repair shifts fuel to reduce emissions under tight cap."""
-    problem = _create_test_problem(emissions_cap_t=50.0)
+    problem = _create_test_problem(emissions_cap_t=40.0)
     initial_plan = [{
         "route_id": 1,
         "route_name": "Test Route",

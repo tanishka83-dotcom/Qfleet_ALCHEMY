@@ -11,7 +11,7 @@ import sys
 import time
 import pathlib
 import numpy as np
-from scipy.optimize import milp, LinearConstraint
+from scipy.optimize import milp, LinearConstraint, Bounds
 from scipy.sparse import csc_matrix
 from typing import Any
 
@@ -90,37 +90,42 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
     A_vessel = np.zeros((problem.num_vessels, num_vars))
     b_vessel_u = np.zeros(problem.num_vessels)
     for v_idx, v in enumerate(problem.vessels):
-        max_q = problem.vessel_limits.get(v["vessel_class"], problem.vessel_limits.get(v["name"], 2))
-        b_vessel_u[v_idx] = max_q
+        max_q = problem.vessel_limits.get(
+            v["name"],
+            problem.vessel_limits.get(v["vessel_class"], problem.vessel_limits.get(str(v["id"]), 2))
+        )
+        b_vessel_u[v_idx] = float(max_q)
 
     for i, cand in enumerate(candidates):
         A_vessel[cand["v_idx"], i] = 1.0
-    b_vessel_l = np.zeros(problem.num_vessels)
+    b_vessel_l = np.full(problem.num_vessels, -np.inf)
 
     # 3. Emissions cap: sum_{i} co2_i * x_i <= emissions_cap_t
     if problem.emissions_cap_t is not None:
         A_co2 = np.zeros((1, num_vars))
         for i, cand in enumerate(candidates):
             A_co2[0, i] = cand["co2"]
-        b_co2_l = np.array([0.0])
+        b_co2_l = np.array([-np.inf])
         b_co2_u = np.array([problem.emissions_cap_t])
 
-        A_all = np.vstack([A_eq, A_vessel, A_co2])
-        lhs = np.concatenate([b_eq_l, b_vessel_l, b_co2_l])
-        rhs = np.concatenate([b_eq_u, b_vessel_u, b_co2_u])
+        A_all = np.vstack([A_eq, A_co2, A_vessel])
+        lhs = np.concatenate([b_eq_l, b_co2_l, b_vessel_l])
+        rhs = np.concatenate([b_eq_u, b_co2_u, b_vessel_u])
     else:
         A_all = np.vstack([A_eq, A_vessel])
         lhs = np.concatenate([b_eq_l, b_vessel_l])
         rhs = np.concatenate([b_eq_u, b_vessel_u])
 
-    constraints = LinearConstraint(csc_matrix(A_all), lhs, rhs)
+    constraints = LinearConstraint(A_all, lhs, rhs)
     integrality = np.ones(num_vars)
+    bounds = Bounds(lb=0.0, ub=1.0)
 
     res = milp(
         c=c,
         integrality=integrality,
         constraints=constraints,
-        options={"time_limit": 30.0, "mip_rel_gap": 0.01},
+        bounds=bounds,
+        options={"time_limit": 60.0, "disp": False},
     )
     runtime_s = time.perf_counter() - start_time
 
