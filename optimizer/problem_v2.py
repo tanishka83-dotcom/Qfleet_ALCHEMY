@@ -56,6 +56,9 @@ VESSEL_AUX_POWER_KW: dict[str, float] = {
 }
 
 
+_GLOBAL_LOOKUP_CACHE: dict[Any, dict] = {}
+
+
 class FleetOptimizationProblemV2:
     """
     Phase 5 / Version 2 Fleet Optimization Problem.
@@ -71,6 +74,7 @@ class FleetOptimizationProblemV2:
         weights: dict[str, float] | None = None,
         emissions_cap_t: float | None = None,
         vessel_limits: dict[str, int] | None = None,
+        speed_bins: list[float] | None = None,
         instance_name: str = "Custom_V2",
     ):
         self.instance_name = instance_name
@@ -86,9 +90,15 @@ class FleetOptimizationProblemV2:
         self.num_fuels = len(fuels)
 
         self.surrogate = get_surrogate_model()
-        self.speed_bins = [0.7, 0.8, 0.9, 1.0, 1.05]
-        self._lookup_cache: dict[tuple, dict] = {}
-        self._precompute_lookup_table()
+        self.speed_bins = list(speed_bins) if speed_bins is not None else [0.7, 0.8, 0.9, 1.0, 1.05]
+        
+        cache_key = (self.instance_name, self.num_routes, self.num_vessels, self.num_fuels, tuple(self.speed_bins))
+        if cache_key in _GLOBAL_LOOKUP_CACHE:
+            self._lookup_cache = _GLOBAL_LOOKUP_CACHE[cache_key]
+        else:
+            self._lookup_cache = {}
+            self._precompute_lookup_table()
+            _GLOBAL_LOOKUP_CACHE[cache_key] = self._lookup_cache
 
     def _precompute_lookup_table(self) -> None:
         """Precompute surrogate predictions across (route, option, vessel, speed, fuel)."""

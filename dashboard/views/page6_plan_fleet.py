@@ -40,6 +40,10 @@ def validate_fleet_csv(file_or_buffer: Any) -> tuple[pd.DataFrame | None, str | 
             return None, f"Number of routes ({len(df)}) exceeds maximum allowed limit of 50."
         if len(df) == 0:
             return None, "Uploaded CSV contains no route rows."
+        numeric_cols = ["distance_nm", "cargo_demand_teu", "deadline_days"]
+        for c in numeric_cols:
+            if not pd.to_numeric(df[c], errors="coerce").notnull().all():
+                return None, f"Column '{c}' must contain valid numeric values."
         return df, None
     except Exception as e:
         return None, f"Error parsing CSV: {e}"

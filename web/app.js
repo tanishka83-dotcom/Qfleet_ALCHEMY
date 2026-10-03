@@ -100,20 +100,21 @@ async function renderBenchmark() {
 
   for (const row of data.benchmark_rows) {
     const tr = document.createElement("tr");
+    const nDisplay = (row.n_feasible !== null && row.n_runs !== null) ? `${row.n_feasible}/${row.n_runs}` : (row.n_feasible !== null ? String(row.n_feasible) : "--");
 
     if (row.is_failed) {
       tr.className = "row-failed";
       tr.innerHTML =
-        `<td>${escapeHtml(row.instance)}</td>` +
+        `<td><strong>${escapeHtml(row.instance)}</strong></td>` +
         `<td>${escapeHtml(row.algorithm)}</td>` +
-        `<td class="failed-message" colspan="5">Failed: no feasible plan</td>` +
+        `<td class="failed-message" colspan="5" style="color: #f43f5e; font-style: italic;">Failed: no feasible plan</td>` +
         `<td>${escapeHtml(row.reference_type)}</td>` +
         `<td>${fmtPct(row.feasibility_rate_pct)}</td>` +
-        `<td>${fmtNum(row.n_feasible)}</td>` +
+        `<td>${nDisplay}</td>` +
         `<td>${fmtRuntime(row.mean_runtime_s)}</td>`;
     } else {
       tr.innerHTML =
-        `<td>${escapeHtml(row.instance)}</td>` +
+        `<td><strong>${escapeHtml(row.instance)}</strong></td>` +
         `<td>${escapeHtml(row.algorithm)}</td>` +
         `<td>${fmtDollar(row.mean_objective)}</td>` +
         `<td>${fmtDollar(row.std_objective)}</td>` +
@@ -122,7 +123,7 @@ async function renderBenchmark() {
         `<td>${fmtPct(row.gap_to_ref_pct)}</td>` +
         `<td>${escapeHtml(row.reference_type)}</td>` +
         `<td>${fmtPct(row.feasibility_rate_pct)}</td>` +
-        `<td>${fmtNum(row.n_feasible)}</td>` +
+        `<td>${nDisplay}</td>` +
         `<td>${fmtRuntime(row.mean_runtime_s)}</td>`;
     }
 

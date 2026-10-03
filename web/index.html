@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QFleet — Maritime Fleet Fuel &amp; Emissions Optimisation</title>
-  <meta name="description" content="QFleet: AI/ML and Quantum-Inspired Optimisation for Maritime Fleet Fuel Efficiency and Emissions (SIH26138).">
+  <title>QFleet — Maritime Fleet Fuel &amp; Emissions Optimization</title>
+  <meta name="description" content="QFleet: AI-based fuel prediction and quantum-inspired optimization for maritime fleet decarbonization and routing (SIH26138).">
   <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Ambient Particle & Wave Background Container -->
+  <!-- Ambient Ocean Background -->
   <div class="ocean-background">
     <div class="sky-glow"></div>
     <div class="stars-particles" id="particles"></div>
@@ -23,109 +23,215 @@
   <header class="glass-nav">
     <div class="nav-brand">
       <span class="brand-icon">⚓</span>
-      <span class="brand-text">QFleet</span>
+      <span class="brand-text">QFLEET</span>
     </div>
     <nav class="nav-links">
       <a href="#hero">Overview</a>
-      <a href="#how-it-addresses">Architecture</a>
+      <a href="#how-it-addresses">Solution</a>
+      <a href="#architecture">Architecture</a>
       <a href="#benchmark-section">Benchmarks</a>
-      <a href="#routes-map-section">Global Routes</a>
-      <a href="#route-fuel-section">Alternative Fuels</a>
+      <a href="#routes-map-section">Routes &amp; Shore</a>
+      <a href="#route-fuel-section">Fuels</a>
       <a href="#limitations-section">Limitations</a>
     </nav>
     <div class="nav-action">
+      <span class="nav-status-pill">SIH26138</span>
       <a href="http://localhost:8501" class="pill-btn" id="nav-dashboard-link">Open Planner →</a>
     </div>
   </header>
 
   <main class="content-canvas">
-    <!-- Hero Section with 3D Extruded Wordmark & Animated Waves -->
+    <!-- Hero Section with Template-Aligned Layout & Oceanic Portal -->
     <section id="hero" class="hero-container">
-      <div class="hero-content">
-        <div class="badge-pill">SIH Problem ID: SIH26138 • Maritime Logistics</div>
-        
-        <!-- 3D Extruded Wordmark -->
-        <div class="wordmark-container" id="wordmark-3d">
-          <div class="wordmark-letter-depth" data-text="QFLEET">QFLEET</div>
+      <div class="hero-grid">
+        <!-- Left Column: Problem & Proposed Solution -->
+        <div class="hero-text-col">
+          <div class="badge-pill">SIH PROBLEM ID: SIH26138 • MARITIME DECARBONIZATION</div>
+          <h1 class="hero-title">AI &amp; QUANTUM-INSPIRED FLEET OPTIMIZATION</h1>
+          
+          <div class="proposed-solution-box" id="project-summary">
+            <h3 class="solution-heading">Proposed Solution</h3>
+            <p class="solution-text">
+              Our system combines AI-based fuel consumption prediction with quantum-inspired optimization to select vessels, speeds, fuel types and routes while considering fuel cost, emissions, cargo demand and delivery constraints.
+              <span class="sub-disclosure">(synthetic data; quantum-inspired = classical algorithms)</span>
+            </p>
+          </div>
+
+          <div class="hero-cta-row">
+            <a href="#how-it-addresses" class="hero-cta-btn">Explore Solution ↓</a>
+            <a href="http://localhost:8501" class="hero-secondary-btn">Interactive Planner ↗</a>
+          </div>
         </div>
-        
-        <p class="hero-subtext">Quantum-Inspired Maritime Fleet Fuel Efficiency &amp; Emissions Decarbonization</p>
+
+        <!-- Right Column: Visual Maritime Portal Element -->
+        <div class="hero-portal-col">
+          <div class="maritime-portal-frame">
+            <div class="portal-circle-glow"></div>
+            <div class="portal-inner-image">
+              <div class="ship-portal-visual">
+                <div class="ship-hull"></div>
+                <div class="wake-lines"></div>
+                <div class="ocean-foam"></div>
+              </div>
+            </div>
+            <!-- Slide / Index Counter from reference -->
+            <div class="portal-counter">
+              <span class="counter-num active">01</span>
+              <span class="counter-divider">/</span>
+              <span class="counter-num">03</span>
+            </div>
+            <div class="portal-caption">
+              <span class="caption-tag">RO-RO / CONTAINER FLEET DISPATCH</span>
+              <span class="caption-sub">Optimized Vessel, Speed, Fuel &amp; Route Selection</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Multi-Layer Translucent Ocean Waves -->
-      <div class="wave-layer-wrapper">
-        <svg class="ocean-waves" viewBox="0 24 150 28" preserveAspectRatio="none">
-          <defs>
-            <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-          </defs>
-          <g class="parallax-wave">
-            <use href="#gentle-wave" x="48" y="0" fill="rgba(0, 210, 255, 0.25)" />
-            <use href="#gentle-wave" x="48" y="3" fill="rgba(10, 50, 92, 0.45)" />
-            <use href="#gentle-wave" x="48" y="5" fill="rgba(14, 30, 60, 0.65)" />
-            <use href="#gentle-wave" x="48" y="7" fill="#0a192f" />
-          </g>
-        </svg>
+      <!-- Innovation & Uniqueness Banner -->
+      <div class="innovation-banner">
+        <div class="banner-track">
+          <span class="banner-item">✨ AI Prediction</span>
+          <span class="banner-dot">•</span>
+          <span class="banner-item">⚡ Quantum-Inspired Optimization</span>
+          <span class="banner-dot">•</span>
+          <span class="banner-item">🧭 Route Intelligence</span>
+          <span class="banner-dot">•</span>
+          <span class="banner-item">🌱 Green Fuel Analysis</span>
+        </div>
       </div>
     </section>
 
-    <!-- Overlapping Glass KPI Panel -->
-    <section id="project-summary" class="overlap-panel">
-      <div class="glass-card main-summary-card">
-        <div class="summary-header">
-          <h2>Next-Generation Fleet Optimization Engine</h2>
-          <p>Physics-guided machine learning surrogate models paired with mathematical MILP solvers and quantum-inspired classical heuristics.</p>
-        </div>
+    <!-- KPI Multi-Column Bar -->
+    <section id="kpi-bar" class="kpi-section">
+      <div class="glass-card kpi-container-card">
         <div class="kpi-grid">
           <div class="kpi-tile">
-            <span class="kpi-label">Active Vessels</span>
+            <div class="kpi-icon-wrap">🚢</div>
             <span class="kpi-value" id="stat-vessels">19</span>
+            <span class="kpi-label">Active Vessels</span>
             <span class="kpi-sub">Feeder to ULCS Classes</span>
           </div>
           <div class="kpi-tile">
-            <span class="kpi-label">Commercial Routes</span>
+            <div class="kpi-icon-wrap">🌐</div>
             <span class="kpi-value" id="stat-routes">68</span>
-            <span class="kpi-sub">Global Port Pairs</span>
+            <span class="kpi-label">Commercial Routes</span>
+            <span class="kpi-sub">Global Port Pair Network</span>
           </div>
           <div class="kpi-tile">
-            <span class="kpi-label">Decarbonization Fuels</span>
+            <div class="kpi-icon-wrap">🧪</div>
             <span class="kpi-value" id="stat-fuels">5</span>
-            <span class="kpi-sub">HFO, VLSFO, MGO, LNG, Methanol</span>
+            <span class="kpi-label">Decarbonization Fuels</span>
+            <span class="kpi-sub" id="fuel-names">HFO, VLSFO, MGO, LNG, Methanol</span>
           </div>
           <div class="kpi-tile">
-            <span class="kpi-label">Database Runs</span>
+            <div class="kpi-icon-wrap">📊</div>
             <span class="kpi-value" id="stat-opt-runs">658</span>
-            <span class="kpi-sub">Canonical Verified Runs</span>
+            <span class="kpi-label">Verified Production Runs</span>
+            <span class="kpi-sub">Strict Read-Only Database (658)</span>
           </div>
         </div>
-        <div id="fuel-list" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
-          <strong>Fuels in grid:</strong> <span id="fuel-names">--</span> | 
-          <strong>Vessel classes:</strong> <span id="vessel-classes">--</span>
+      </div>
+    </section>
+
+    <!-- How It Addresses the Problem Section -->
+    <section id="how-it-addresses" class="section-container">
+      <div class="glass-card">
+        <div class="card-header">
+          <h2 class="section-title">How It Addresses the Problem</h2>
+          <p class="section-desc">Evidence-backed features addressing commercial fleet decarbonization and operational dispatch constraints.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-num">1</div>
+            <h3>Predicts Fuel Consumption</h3>
+            <p>Accurately estimates fuel burn across diverse hydrodynamic operating conditions using physics-guided surrogate ML models (synthetic data).</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-num">2</div>
+            <h3>Optimizes Vessel, Speed, Route &amp; Fuel</h3>
+            <p>Explores multi-dimensional decision tensors across direct, weather-optimized, and low-ECA candidate route corridors.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-num">3</div>
+            <h3>Evaluates Alternative Fuels &amp; Shore Power</h3>
+            <p>Compares lifecycle WTW carbon intensity and evaluates at-berth cold-ironing electrification against auxiliary engine fuel consumption.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-num">4</div>
+            <h3>Rigorous Constraint Auditing</h3>
+            <p>Checks every plan against CO₂ emission caps, vessel class quotas, cargo capacities, and delivery deadlines, reporting when methods fail.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-num">5</div>
+            <h3>Mathematical &amp; Quantum-Inspired Benchmarking</h3>
+            <p>Benchmarks classical quantum-inspired heuristics (GA, SQA, QI-EA) against exact MILP solvers, transparently reporting where heuristics lose.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- How It Addresses the Problem -->
-    <section id="how-it-addresses-section" class="section-container">
+    <!-- Architecture & Flowchart Section -->
+    <section id="architecture" class="section-container">
       <div class="glass-card">
-        <h2 class="section-title">How It Addresses the Problem</h2>
-        <ol class="claims-list" id="how-it-addresses">
-          <li><strong>Surrogate Fuel Prediction:</strong> Predicts fuel use from voyage conditions with a surrogate model (synthetic data).</li>
-          <li><strong>Multi-Objective Assignment:</strong> Assigns vessel, speed, and fuel to each voyage to minimize cost, emissions, and delay.</li>
-          <li><strong>Alternative Fuel Evaluation:</strong> Compares alternative fuels under a carbon price.</li>
-          <li><strong>Rigorous Constraint Auditing:</strong> Checks every plan against CO₂ cap, class quotas, cargo capacity, and deadlines, and reports when a method fails them.</li>
-          <li><strong>Classical Quantum-Inspired Benchmarking:</strong> Benchmarks quantum-inspired methods against an exact solver, including where they lose.</li>
-        </ol>
+        <div class="card-header">
+          <h2 class="section-title">System Architecture Flowchart</h2>
+          <p class="section-desc">End-to-end data pipeline from vessel telemetry to verified green fleet dispatch plans.</p>
+        </div>
+
+        <div class="flowchart-container">
+          <div class="flow-step">
+            <div class="flow-badge">Input</div>
+            <div class="flow-box">
+              <h4>Fleet Data</h4>
+              <p>Vessel, Cargo, Weather, Route &amp; Fuel Telemetry</p>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-badge">ML Model</div>
+            <div class="flow-box">
+              <h4>AI Fuel Prediction</h4>
+              <p>Physics-Guided Surrogate (Random Forest / MLP)</p>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-badge">Optimizer</div>
+            <div class="flow-box highlight-opt">
+              <h4>Quantum-Inspired Optimization</h4>
+              <p>MILP Exact Solver vs SQA, QI-EA, GA Heuristics</p>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-badge">Plan</div>
+            <div class="flow-box">
+              <h4>Optimized Fleet Plan</h4>
+              <p>(Route, Vessel, Fuel, Speed, Shore Power)</p>
+            </div>
+          </div>
+          <div class="flow-arrow">➔</div>
+          <div class="flow-step">
+            <div class="flow-badge">Outcome</div>
+            <div class="flow-box success-box">
+              <h4>Green Fleet Plan</h4>
+              <p id="measured-saving-display">Measured saving vs naive baseline: <strong>23.4% ($1.77M)</strong> [Exact Reference]</p>
+            </div>
+          </div>
+        </div>
+        <p class="flow-note">
+          <strong>Solver Note:</strong> MILP (exact) is the best-performing solver on the tested sizes; the quantum-inspired methods are classical algorithms benchmarked against it.
+        </p>
       </div>
     </section>
 
-    <!-- Global Routes Heatmap Card (Inline SVG) -->
+    <!-- Global Routes & Shore Power Map Section -->
     <section id="routes-map-section" class="section-container">
       <div class="glass-card map-card">
         <div class="card-header">
-          <div>
-            <h2 class="section-title">Global Maritime Network &amp; Shore Power Availability</h2>
-            <p class="section-desc">Interactive geographic routing with cold-ironing electrification hubs.</p>
-          </div>
+          <h2 class="section-title">Global Maritime Routing &amp; Shore Power Network</h2>
+          <p class="section-desc">Interactive geographic corridors with candidate route options and port cold-ironing electrification hubs.</p>
         </div>
         <div class="svg-map-wrapper">
           <svg class="world-svg-map" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
@@ -156,15 +262,15 @@
 
             <circle class="port-glow" cx="530" cy="110" r="7" />
             <circle class="port-dot shore-available" cx="530" cy="110" r="4" />
-            <text class="port-label" x="540" y="105">Hamburg (🔌)</text>
+            <text class="port-label" x="540" y="105">Hamburg (🔌 Shore)</text>
 
             <circle class="port-glow" cx="220" cy="180" r="7" />
             <circle class="port-dot shore-available" cx="220" cy="180" r="4" />
-            <text class="port-label" x="120" y="185">Los Angeles (🔌)</text>
+            <text class="port-label" x="120" y="185">Los Angeles (🔌 Shore)</text>
 
             <circle class="port-glow" cx="210" cy="140" r="7" />
             <circle class="port-dot shore-available" cx="210" cy="140" r="4" />
-            <text class="port-label" x="130" y="140">Seattle (🔌)</text>
+            <text class="port-label" x="130" y="140">Seattle (🔌 Shore)</text>
           </svg>
         </div>
       </div>
@@ -173,8 +279,10 @@
     <!-- Benchmark Results Section -->
     <section id="benchmark-section" class="section-container">
       <div class="glass-card">
-        <h2 class="section-title">Benchmark Results &amp; Feasibility Rates</h2>
-        <p class="section-desc">All values read directly from <code>benchmark_results.csv</code>. Failed methods show "Failed: no feasible plan" with no cost figure.</p>
+        <div class="card-header">
+          <h2 class="section-title">Benchmark Results &amp; Feasibility Rates</h2>
+          <p class="section-desc">Feasible-only statistics with <em>n</em> (feasible / total runs). Infeasible runs display <code>Failed: no feasible plan</code> without cost values.</p>
+        </div>
         <div class="table-wrapper">
           <table id="benchmark-table">
             <thead>
@@ -188,7 +296,7 @@
                 <th>Gap to Ref (%)</th>
                 <th>Reference Type</th>
                 <th>Feas. Rate (%)</th>
-                <th>n Feasible</th>
+                <th>n (Feas/Total)</th>
                 <th>Runtime (s)</th>
               </tr>
             </thead>
@@ -200,20 +308,22 @@
       </div>
     </section>
 
-    <!-- Statistical Tests Section -->
+    <!-- Statistical Significance Section -->
     <section id="statistical-tests-section" class="section-container">
       <div class="glass-card">
-        <h2 class="section-title">Wilcoxon Signed-Rank Tests</h2>
-        <p class="section-desc">Pairwise comparisons with Holm correction. A positive mean_diff means the first method is worse.</p>
+        <div class="card-header">
+          <h2 class="section-title">Statistical Hypothesis Tests (Wilcoxon Signed-Rank)</h2>
+          <p class="section-desc">Paired statistical significance tests with Holm-Bonferroni correction (α = 0.05).</p>
+        </div>
         <div class="table-wrapper">
           <table id="stats-table">
             <thead>
               <tr>
                 <th>Instance</th>
                 <th>Comparison</th>
-                <th>Mean Diff ($)</th>
+                <th>Mean Difference ($)</th>
                 <th>Wilcoxon p (Holm)</th>
-                <th>Significant (α=0.05)</th>
+                <th>Significant (p &lt; 0.05)</th>
               </tr>
             </thead>
             <tbody id="stats-tbody">
@@ -224,13 +334,15 @@
       </div>
     </section>
 
-    <!-- Route Alternative Fuels Section -->
+    <!-- Alternative Fuel Analysis by Route Section -->
     <section id="route-fuel-section" class="section-container">
       <div class="glass-card">
-        <h2 class="section-title">Alternative Fuel Comparison by Route</h2>
-        <p class="section-desc">Estimated fuel consumption, operational fuel cost, WTW CO₂ emissions, and total cost under carbon pricing ($100/t CO₂eq) for Post-Panamax at 18.0 knots.</p>
+        <div class="card-header">
+          <h2 class="section-title">Alternative Fuel Comparison Across All Routes</h2>
+          <p class="section-desc">Evaluates operational fuel mass, fuel cost, Well-to-Wake (WTW) lifecycle emissions, and carbon penalty ($100/t CO₂eq) for Post-Panamax at 18.0 kn.</p>
+        </div>
         <div class="route-select-wrapper">
-          <label for="route-select"><strong>Select Commercial Voyage Route:</strong></label>
+          <label for="route-select"><strong>Select Voyage Corridor:</strong></label>
           <select id="route-select">
             <option value="">Loading routes…</option>
           </select>
@@ -255,46 +367,65 @@
       </div>
     </section>
 
-    <!-- Limitations Box -->
+    <!-- Engineering Limitations Box -->
     <section id="limitations-section" class="section-container">
       <div class="glass-card limitations-card">
-        <h2 class="section-title" style="color: #ff6b6b;">Engineering Limitations &amp; Disclosures</h2>
+        <div class="card-header">
+          <h2 class="section-title" style="color: #ff6b6b;">Engineering Disclosures &amp; Limitations</h2>
+          <p class="section-desc">Transparent reporting of assumptions, computational boundaries, and algorithm constraints.</p>
+        </div>
         <ul class="limitations-list">
-          <li>All voyage and fleet data is <strong>synthetic</strong> (parameterised physics generator).</li>
-          <li><span id="lim-todo-count">30</span> <code>TODO_VERIFY</code> items remain unresolved (flagged in <code>config.py</code>).</li>
-          <li>MILP finds proven optima on all tested instances at this benchmark scale.</li>
-          <li>QI-EA and SQA produce no feasible plans on Medium and Large instances under unassisted heuristic search.</li>
-          <li>QI-EA, GA, and SQA are <strong>quantum-inspired classical algorithms</strong> — no quantum hardware or qubits are used.</li>
+          <li>All voyage and vessel telemetry is <strong>synthetic data</strong> generated from parameterized hydrodynamic models.</li>
+          <li><span id="lim-todo-count">38</span> <code>TODO_VERIFY</code> assumption entries remain recorded and verifiable via API.</li>
+          <li><strong>MILP (exact)</strong> wins on all tested benchmark instance sizes; quantum-inspired methods (QI-EA, SQA) lose or fail binding constraints unless assisted by domain repair.</li>
+          <li><strong>Quantum-Inspired Classical Algorithms:</strong> GA, SQA, and QI-EA run on standard classical CPUs — there are no physical qubits, superposition, or quantum hardware.</li>
+          <li>Emissions caps and class quotas are strictly enforced; no quantum advantage is claimed.</li>
         </ul>
       </div>
     </section>
 
-    <!-- Visible TODO_VERIFY Items -->
+    <!-- Assumptions Register Section -->
     <section id="todo-verify-section" class="section-container">
       <div class="glass-card">
-        <h2 class="section-title">Assumptions &amp; Verification Register</h2>
-        <p class="section-desc">Every value without a single authoritative regulatory primary source is catalogued transparently.</p>
+        <div class="card-header">
+          <h2 class="section-title">Assumptions &amp; Verification Register</h2>
+          <p class="section-desc">Full catalogue of unverified proxy parameters (TV-01 through TV-40).</p>
+        </div>
         <div id="todo-verify-list" class="todo-list">
           <p>Loading register…</p>
         </div>
       </div>
     </section>
 
-    <!-- Dashboard Link -->
+    <!-- Plan a Fleet Interactive CTA -->
     <section id="dashboard-link-section" class="section-container">
-      <div class="glass-card" style="text-align: center;">
-        <h2 class="section-title">Full Analytics Dashboard</h2>
-        <p class="section-desc">Open the multi-page interactive Streamlit dashboard for fleet simulation, route exploration, and sensitivity analytics.</p>
-        <a href="http://localhost:8501" class="pill-btn" id="streamlit-link" style="font-size: 1rem; padding: 0.6rem 2rem;">
-          Launch Streamlit Dashboard →
+      <div class="glass-card plan-fleet-cta-card">
+        <h2 class="section-title">Plan a Fleet Interactive Engine</h2>
+        <p class="section-desc">Configure custom voyage manifests, upload CSV manifests (up to 50 routes), adjust carbon prices, and run synchronous MILP or background heuristics with live convergence polling.</p>
+        <a href="http://localhost:8501" class="pill-btn primary-cta-btn" id="streamlit-link">
+          Launch Fleet Planner (Streamlit Page 6) →
         </a>
       </div>
     </section>
   </main>
 
-  <!-- Footer -->
+  <!-- Clean Navy Glass Footer -->
   <footer class="glass-footer">
-    <p>QFleet — SIH26138 | Powered by Physics+ML Surrogate &amp; Mathematical Optimizers | Data: <code>data/qfleet.db</code> (mode=ro)</p>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>⚓ QFLEET</h3>
+        <p>Smart Maritime Fleet Fuel &amp; Emissions Optimization Platform • SIH26138</p>
+      </div>
+      <div class="footer-links">
+        <a href="#hero">Overview</a>
+        <a href="#benchmark-section">Benchmarks</a>
+        <a href="#route-fuel-section">Alternative Fuels</a>
+        <a href="#limitations-section">Limitations</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 QFleet Maritime Systems • Production Database: <code>data/qfleet.db</code> (mode=ro)</p>
+    </div>
   </footer>
 
   <script src="app.js"></script>

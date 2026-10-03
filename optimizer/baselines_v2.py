@@ -12,6 +12,7 @@ import time
 import pathlib
 import numpy as np
 from scipy.optimize import milp, LinearConstraint
+from scipy.sparse import csc_matrix
 from typing import Any
 
 _ROOT = pathlib.Path(__file__).parent.parent
@@ -28,13 +29,14 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
     """
     start_time = time.perf_counter()
     candidates = []
-    
+
     for r_idx, route in enumerate(problem.routes):
         route_options = route.get("route_options", [{"option_id": 0}])
         for opt in route_options:
             opt_id = opt["option_id"]
             for v_idx, vessel in enumerate(problem.vessels):
-                if vessel.get("capacity_teu", vessel.get("teu_capacity", 0)) < route["cargo_demand_teu"]:
+                v_cap = vessel.get("capacity_teu", vessel.get("teu_capacity", 0))
+                if v_cap < route["cargo_demand_teu"]:
                     continue
                 des_spd = float(vessel["design_speed_kn"])
                 for s_factor in problem.speed_bins:
@@ -77,7 +79,6 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
     for i, cand in enumerate(candidates):
         c[i] = (w1 * cand["cost"]) + (w2 * cand["co2"]) + (w3 * cand["delay"])
 
-    # Constraints:
     # 1. Exactly one assignment per route: sum_{i in route r} x_i = 1
     A_eq = np.zeros((problem.num_routes, num_vars))
     for i, cand in enumerate(candidates):
@@ -112,14 +113,19 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
         lhs = np.concatenate([b_eq_l, b_vessel_l])
         rhs = np.concatenate([b_eq_u, b_vessel_u])
 
-    constraints = LinearConstraint(A_all, lhs, rhs)
+    constraints = LinearConstraint(csc_matrix(A_all), lhs, rhs)
     integrality = np.ones(num_vars)
 
-    res = milp(c=c, integrality=integrality, constraints=constraints)
+    res = milp(
+        c=c,
+        integrality=integrality,
+        constraints=constraints,
+        options={"time_limit": 30.0, "mip_rel_gap": 0.01},
+    )
     runtime_s = time.perf_counter() - start_time
 
-    if not res.success:
-        return [], float("inf"), {"status": "infeasible", "runtime_s": runtime_s}
+    if not res.success and res.x is None:
+        return [], float("inf"), {"status": "infeasible", "runtime_s": runtime_s, "is_feasible": False}
 
     chosen_indices = np.where(res.x > 0.5)[0]
     solution = []
@@ -144,7 +150,7 @@ def milp_optimize_v2(problem: FleetOptimizationProblemV2, seed: int = 42) -> tup
     final_obj, is_feas, details = problem.evaluate(solution)
 
     return solution, final_obj, {
-        "status": "optimal",
+        "status": "optimal" if is_feas else "infeasible",
         "runtime_s": runtime_s,
         "is_feasible": is_feas,
         "co2_t": details["co2_wtw_t"],
