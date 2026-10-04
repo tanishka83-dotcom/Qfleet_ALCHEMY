@@ -38,16 +38,17 @@ def run_benchmark_experiments():
     instances = ["Small_v2", "Medium_v2", "Large_v2", "Mega_30V_100R"]
     seeds = [42, 123, 456, 789, 999]  # 5 standard seeds
 
-    # Budget per instance
+    # Budget per instance for exact parity
     budgets = {
-        "Small_v2": {"pop": 20, "gen": 60, "trotter": 10, "sqa_steps": 60},
-        "Medium_v2": {"pop": 30, "gen": 80, "trotter": 10, "sqa_steps": 80},
-        "Large_v2": {"pop": 30, "gen": 100, "trotter": 10, "sqa_steps": 100},
-        "Mega_30V_100R": {"pop": 30, "gen": 100, "trotter": 10, "sqa_steps": 100},
+        "Small_v2": {"pop": 20, "gen": 60, "trotter": 10, "sqa_steps": 120},        # 1,200 evals
+        "Medium_v2": {"pop": 30, "gen": 100, "trotter": 10, "sqa_steps": 300},     # 3,000 evals
+        "Large_v2": {"pop": 30, "gen": 200, "trotter": 10, "sqa_steps": 600},      # 6,000 evals
+        "Mega_30V_100R": {"pop": 30, "gen": 200, "trotter": 10, "sqa_steps": 600}, # 6,000 evals
     }
 
     results = []
     out_path = _ROOT / "results" / "phase5_v2_benchmark.csv"
+    out_new_path = _ROOT / "results" / "phase5_v2_benchmark_new.csv"
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     for inst_name in instances:
@@ -131,9 +132,9 @@ def run_benchmark_experiments():
             ("GeneticAlgorithm (GA)", lambda s: ga_optimize_v2(prob, pop_size=b_cfg["pop"], n_generations=b_cfg["gen"], seed=s, with_cap_repair=False)),
             ("SimulatedQuantumAnnealing (SQA)", lambda s: sqa_optimize_v2(prob, n_trotter=b_cfg["trotter"], n_steps=b_cfg["sqa_steps"], seed=s, with_cap_repair=False)),
             ("QI-EA", lambda s: qiea_optimize_v2(prob, pop_size=b_cfg["pop"], n_generations=b_cfg["gen"], seed=s, with_cap_repair=False)),
-            ("GeneticAlgorithm (with cap-repair)", lambda s: ga_optimize_v2(prob, pop_size=b_cfg["pop"], n_generations=b_cfg["gen"], seed=s, with_cap_repair=True)),
-            ("SimulatedQuantumAnnealing (with cap-repair)", lambda s: sqa_optimize_v2(prob, n_trotter=b_cfg["trotter"], n_steps=b_cfg["sqa_steps"], seed=s, with_cap_repair=True)),
-            ("QI-EA (with cap-repair)", lambda s: qiea_optimize_v2(prob, pop_size=b_cfg["pop"], n_generations=b_cfg["gen"], seed=s, with_cap_repair=True)),
+            ("GeneticAlgorithm (with simple cap-repair)", lambda s: ga_optimize_v2(prob, pop_size=b_cfg["pop"], n_generations=b_cfg["gen"], seed=s, with_cap_repair=True)),
+            ("SimulatedQuantumAnnealing (with simple cap-repair)", lambda s: sqa_optimize_v2(prob, n_trotter=b_cfg["trotter"], n_steps=b_cfg["sqa_steps"], seed=s, with_cap_repair=True)),
+            ("QI-EA (with simple cap-repair)", lambda s: qiea_optimize_v2(prob, pop_size=b_cfg["pop"], n_generations=b_cfg["gen"], seed=s, with_cap_repair=True)),
         ]
 
         for alg_name, runner in methods:
@@ -195,10 +196,12 @@ def run_benchmark_experiments():
 
         # Save intermediate
         pd.DataFrame(results).to_csv(out_path, index=False)
+        pd.DataFrame(results).to_csv(out_new_path, index=False)
 
     df_results = pd.DataFrame(results)
     df_results.to_csv(out_path, index=False)
-    print(f"\nSaved v2 benchmark table to {out_path}", flush=True)
+    df_results.to_csv(out_new_path, index=False)
+    print(f"\nSaved v2 benchmark table to {out_path} and {out_new_path}", flush=True)
     return df_results
 
 
@@ -210,6 +213,7 @@ def run_cap_sweep():
 
     sweep_results = []
     out_sweep_path = _ROOT / "results" / "phase5_v2_cap_sweep.csv"
+    out_sweep_new_path = _ROOT / "results" / "phase5_v2_cap_sweep_new.csv"
 
     for inst_name in instances:
         print(f"\n========== Cap Sweep on {inst_name} ==========", flush=True)
@@ -250,9 +254,9 @@ def run_cap_sweep():
                 ("GA", lambda: ga_optimize_v2(prob, pop_size=20, n_generations=30, seed=seed, with_cap_repair=False)),
                 ("SQA", lambda: sqa_optimize_v2(prob, n_trotter=10, n_steps=30, seed=seed, with_cap_repair=False)),
                 ("QI-EA", lambda: qiea_optimize_v2(prob, pop_size=20, n_generations=30, seed=seed, with_cap_repair=False)),
-                ("GA (+cap-repair)", lambda: ga_optimize_v2(prob, pop_size=20, n_generations=30, seed=seed, with_cap_repair=True)),
-                ("SQA (+cap-repair)", lambda: sqa_optimize_v2(prob, n_trotter=10, n_steps=30, seed=seed, with_cap_repair=True)),
-                ("QI-EA (+cap-repair)", lambda: qiea_optimize_v2(prob, pop_size=20, n_generations=30, seed=seed, with_cap_repair=True)),
+                ("GA (+simple cap-repair)", lambda: ga_optimize_v2(prob, pop_size=20, n_generations=30, seed=seed, with_cap_repair=True)),
+                ("SQA (+simple cap-repair)", lambda: sqa_optimize_v2(prob, n_trotter=10, n_steps=30, seed=seed, with_cap_repair=True)),
+                ("QI-EA (+simple cap-repair)", lambda: qiea_optimize_v2(prob, pop_size=20, n_generations=30, seed=seed, with_cap_repair=True)),
             ]
 
             for m_name, fn in methods:
@@ -272,10 +276,12 @@ def run_cap_sweep():
                 })
 
             pd.DataFrame(sweep_results).to_csv(out_sweep_path, index=False)
+            pd.DataFrame(sweep_results).to_csv(out_sweep_new_path, index=False)
 
     df_sweep = pd.DataFrame(sweep_results)
     df_sweep.to_csv(out_sweep_path, index=False)
-    print(f"Saved cap sweep to {out_sweep_path}", flush=True)
+    df_sweep.to_csv(out_sweep_new_path, index=False)
+    print(f"Saved cap sweep to {out_sweep_path} and {out_sweep_new_path}", flush=True)
     return df_sweep
 
 

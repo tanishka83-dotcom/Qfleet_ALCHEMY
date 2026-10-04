@@ -119,7 +119,11 @@ def repair_solution_v2(problem: FleetOptimizationProblemV2, plan: list[dict]) ->
     return repaired
 
 
-def apply_shared_cap_repair(problem: FleetOptimizationProblemV2, plan: list[dict]) -> list[dict]:
+def apply_shared_cap_repair(
+    problem: FleetOptimizationProblemV2,
+    plan: list[dict],
+    eval_counter: list[int] | None = None,
+) -> list[dict]:
     """
     Fast Shared Emissions-Cap Repair Operator (applied equally across GA, SQA, QI-EA):
     If total emissions exceed cap, progressively shifts voyages to lower carbon fuels (e.g. LNG/Methanol)
@@ -130,17 +134,21 @@ def apply_shared_cap_repair(problem: FleetOptimizationProblemV2, plan: list[dict
         return repaired_plan
 
     _, is_feas, details = problem.evaluate(repaired_plan)
+    if eval_counter is not None:
+        eval_counter[0] += 1
     if is_feas or details["co2_wtw_t"] <= problem.emissions_cap_t:
         return repaired_plan
 
     # Find cleanest fuel
     cleanest_fuel = min(problem.fuels, key=lambda f: f["co2_wtw_g_per_mj"])
 
-    # Shift highest-emitting routes first
+    # Shift routes to cleanest fuel
     for r_idx in range(len(repaired_plan)):
         repaired_plan[r_idx]["fuel_id"] = cleanest_fuel["id"]
         repaired_plan[r_idx]["fuel_type"] = cleanest_fuel["name"]
         _, is_feas_new, det_new = problem.evaluate(repaired_plan)
+        if eval_counter is not None:
+            eval_counter[0] += 1
         if is_feas_new or det_new["co2_wtw_t"] <= problem.emissions_cap_t:
             break
 
@@ -220,11 +228,13 @@ def greedy_optimize_v2(problem: FleetOptimizationProblemV2, decarb_pass: bool = 
             vessel_usage[problem.vessels[-1]["id"]] += 1
 
     solution = assignments_by_route
+    eval_c = [eval_count]
     if decarb_pass:
-        solution = apply_shared_cap_repair(problem, solution)
+        solution = apply_shared_cap_repair(problem, solution, eval_counter=eval_c)
 
     final_obj, is_feas, details = problem.evaluate(solution)
-    eval_count += 1
+    eval_c[0] += 1
+    eval_count = eval_c[0]
     runtime_s = time.perf_counter() - start_time
 
     return solution, final_obj, {
@@ -334,9 +344,11 @@ def ga_optimize_v2(
             best_fit = fitnesses[gen_best_idx]
             best_sol = population[gen_best_idx]
 
-    final_plan = apply_shared_cap_repair(problem, best_sol) if with_cap_repair else best_sol
+    eval_c = [eval_count]
+    final_plan = apply_shared_cap_repair(problem, best_sol, eval_counter=eval_c) if with_cap_repair else best_sol
     final_obj, is_feas, details = problem.evaluate(final_plan)
-    eval_count += 1
+    eval_c[0] += 1
+    eval_count = eval_c[0]
     runtime_s = time.perf_counter() - start_time
 
     return final_plan, final_obj, {
@@ -442,9 +454,11 @@ def sqa_optimize_v2(
                     best_energy = cand_en
                     best_solution = repaired_neighbor
 
-    final_plan = apply_shared_cap_repair(problem, best_solution) if with_cap_repair else best_solution
+    eval_c = [eval_count]
+    final_plan = apply_shared_cap_repair(problem, best_solution, eval_counter=eval_c) if with_cap_repair else best_solution
     final_obj, is_feas, details = problem.evaluate(final_plan)
-    eval_count += 1
+    eval_c[0] += 1
+    eval_count = eval_c[0]
     runtime_s = time.perf_counter() - start_time
 
     return final_plan, final_obj, {
@@ -538,9 +552,11 @@ def qiea_optimize_v2(
                 elif theta[r_idx, d] > target_angles[d]:
                     theta[r_idx, d] = max(0.0, theta[r_idx, d] - delta_theta)
 
-    final_plan = apply_shared_cap_repair(problem, best_plan) if with_cap_repair else best_plan
+    eval_c = [eval_count]
+    final_plan = apply_shared_cap_repair(problem, best_plan, eval_counter=eval_c) if with_cap_repair else best_plan
     final_obj, is_feas, details = problem.evaluate(final_plan)
-    eval_count += 1
+    eval_c[0] += 1
+    eval_count = eval_c[0]
     runtime_s = time.perf_counter() - start_time
 
     return final_plan, final_obj, {
