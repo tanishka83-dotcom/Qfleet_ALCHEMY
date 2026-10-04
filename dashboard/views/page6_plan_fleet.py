@@ -98,7 +98,7 @@ def render() -> None:
                 vessels_data.append({
                     "id": int(v["id"]), "name": str(v["name"]),
                     "vessel_class": str(v["vessel_class"]),
-                    "capacity_teu": int(v["capacity_teu"]),
+                    "capacity_teu": int(v.get("teu_capacity", v.get("capacity_teu"))),
                     "design_speed_kn": float(v["design_speed_kn"]),
                 })
         else:
@@ -132,7 +132,7 @@ def render() -> None:
                 vessels_data.append({
                     "id": int(v["id"]), "name": str(v["name"]),
                     "vessel_class": str(v["vessel_class"]),
-                    "capacity_teu": int(v["capacity_teu"]),
+                    "capacity_teu": int(v.get("teu_capacity", v.get("capacity_teu"))),
                     "design_speed_kn": float(v["design_speed_kn"]),
                 })
 
@@ -141,7 +141,7 @@ def render() -> None:
         {
             "id": int(f["id"]),
             "name": str(f["name"]),
-            "price_usd_per_tonne": float(f["price_usd_per_tonne"]),
+            "price_usd_per_tonne": float(f.get("price_usd_per_tonne") or __import__("config").BUNKER_PRICES_USD_PER_TONNE.get(f["name"], 650.0)),
             "lhv_mj_per_kg": float(f["lhv_mj_per_kg"]),
             "co2_wtw_g_per_mj": float(f["co2_wtw_g_per_mj"]),
         }

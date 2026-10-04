@@ -96,15 +96,15 @@ def render() -> None:
     st.subheader("🛳️ Fleet Vessel Registry")
     vessels_df = sc_detail["vessels_df"]
     if not vessels_df.empty:
-        disp_vessels = vessels_df[[
-            "id", "name", "vessel_class", "teu_capacity", "dwt_tonnes",
+        disp_vessels = vessels_df[[_c for _c in [
+            "id", "name", "vessel_class", "teu_capacity", "dwt_t",
             "design_speed_kn", "ref_daily_fuel_t", "design_draft_m", "cii_ref_rating"
-        ]].rename(columns={
+        ] if _c in vessels_df.columns]].rename(columns={
             "id": "ID",
             "name": "Vessel Name",
             "vessel_class": "Class",
             "teu_capacity": "Capacity (TEU)",
-            "dwt_tonnes": "DWT (t)",
+            "dwt_t": "DWT (t)",
             "design_speed_kn": "Design Speed (kn)",
             "ref_daily_fuel_t": "Ref Fuel (t/day)",
             "design_draft_m": "Draft (m)",
@@ -120,10 +120,10 @@ def render() -> None:
     st.subheader("🗺️ Voyage Routes & Commercial Commitments")
     routes_df = sc_detail["routes_df"]
     if not routes_df.empty:
-        disp_routes = routes_df[[
+        disp_routes = routes_df[[_c for _c in [
             "id", "name", "origin_port", "dest_port", "distance_nm",
             "cargo_demand_teu", "deadline_days", "draft_limit_m"
-        ]].rename(columns={
+        ] if _c in routes_df.columns]].rename(columns={
             "id": "ID",
             "name": "Route Name",
             "origin_port": "Origin",

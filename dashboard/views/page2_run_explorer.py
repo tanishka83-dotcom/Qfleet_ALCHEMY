@@ -154,7 +154,7 @@ def render() -> None:
         elif selected_algo == "Greedy":
             sol, _, _ = greedy_optimize(prob, seed=int(selected_seed))
         elif selected_algo == "GA":
-            sol, _, _ = ga_optimize(prob, seed=int(selected_seed), budget=config_eval_budget(selected_sc_name))
+            sol = None  # dispatch plan is not stored; the page must not re-run optimizers (read-only)
         elif selected_algo == "SQA":
             sol, _, _ = sqa_optimize(prob, seed=int(selected_seed), budget=config_eval_budget(selected_sc_name))
         elif selected_algo == "QI-EA":
