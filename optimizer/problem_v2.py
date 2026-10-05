@@ -76,18 +76,25 @@ class FleetOptimizationProblemV2:
         vessel_limits: dict[str, int] | None = None,
         speed_bins: list[float] | None = None,
         instance_name: str = "Custom_V2",
+        extended_fuels: bool = False,
     ):
         self.instance_name = instance_name
         self.routes = routes
         self.vessels = vessels
-        self.fuels = fuels
+        self.extended_fuels = extended_fuels
+        self.fuels = [
+            fuel for fuel in fuels
+            if extended_fuels or fuel["name"] not in config.EXTENDED_FUELS
+        ]
+        if fuels and not self.fuels:
+            raise ValueError("No eligible fuels remain for this optimization scenario.")
         self.weights = weights or config.OPTIMIZATION_WEIGHTS.copy()
         self.emissions_cap_t = emissions_cap_t
         self.vessel_limits = vessel_limits or config.DEFAULT_FLEET_VESSEL_LIMITS.copy()
 
         self.num_routes = len(routes)
         self.num_vessels = len(vessels)
-        self.num_fuels = len(fuels)
+        self.num_fuels = len(self.fuels)
 
         self.surrogate = get_surrogate_model()
         self.speed_bins = list(speed_bins) if speed_bins is not None else [0.7, 0.8, 0.9, 1.0, 1.05]

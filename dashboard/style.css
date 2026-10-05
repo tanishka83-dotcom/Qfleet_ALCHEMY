@@ -6,13 +6,164 @@
 
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #e6f1ff;
+    color: #f1f5f9;
+}
+
+html {
+    min-height: 100%;
+    background: transparent !important;
+}
+
+body {
+    min-height: 100%;
+    background: transparent !important;
+}
+
+#bgvid {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.bg-shade {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 15, 30, .45);
+    z-index: 1;
+    pointer-events: none;
+}
+
+html.qfleet-video-fallback,
+body.qfleet-video-fallback {
+    background: linear-gradient(145deg, #0a1428, #0f1f3d 52%, #0b4b58) fixed !important;
+}
+
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMainBlockContainer"] {
+    background: transparent !important;
+    position: relative;
+    z-index: 2;
+}
+
+[data-testid="stMain"] {
+    position: relative;
+    z-index: 2;
+    background: rgba(10, 20, 40, .34) !important;
+    backdrop-filter: blur(3px);
+}
+
+[data-testid="stMainBlockContainer"] {
+    position: relative;
+    z-index: 2;
+    box-sizing: border-box;
+    min-height: 100vh !important;
+    border-radius: 12px;
+    padding: 1rem;
+    background: rgba(10, 20, 40, .55) !important;
+    backdrop-filter: blur(8px);
+}
+
+[data-testid="stHeader"] {
+    background: transparent !important;
+    z-index: 2 !important;
+}
+
+[data-testid="stToolbar"],
+[data-testid="stDeployButton"],
+#MainMenu,
+footer,
+[data-testid="stStatusWidget"] {
+    display: none !important;
+}
+
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarExpandButton"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.qfleet-header {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(0, 2fr) minmax(190px, 1fr);
+    align-items: center;
+    min-height: 50px;
+    margin: 0 0 1rem;
+    padding: 0.55rem 1rem;
+    color: #f4f8ff;
+    background: rgba(10, 20, 40, .55);
+    border: 1px solid rgba(150, 190, 230, .1);
+    border-radius: 9px;
+    backdrop-filter: blur(6px);
+}
+
+.qfleet-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.qfleet-brand span {
+    color: #79d7ef;
+}
+
+.qfleet-page-title {
+    overflow: hidden;
+    color: #fff;
+    font-size: 0.98rem;
+    font-weight: 600;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.qfleet-badge {
+    justify-self: end;
+    padding: 0.28rem 0.55rem;
+    color: #dceafa;
+    background: rgba(93, 151, 182, .16);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .qfleet-header {
+        grid-template-columns: 1fr auto;
+        row-gap: 0.35rem;
+        padding: 0.55rem 0.7rem;
+    }
+
+    .qfleet-page-title {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        text-align: left;
+    }
+
+    .qfleet-badge {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: 0.68rem;
+    }
 }
 
 h1, h2, h3, h4 {
     font-family: 'Outfit', sans-serif !important;
     font-weight: 700 !important;
     color: #ffffff !important;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
 }
 
 code, pre, [data-testid="stCode"] {
@@ -21,11 +172,11 @@ code, pre, [data-testid="stCode"] {
 
 /* Glass metric card styling */
 div[data-testid="stMetric"] {
-    background: rgba(16, 36, 68, 0.65) !important;
-    border: 1px solid rgba(0, 210, 255, 0.22) !important;
+    background: rgba(10, 20, 40, .55) !important;
+    border: 1px solid rgba(255, 255, 255, .08) !important;
     border-radius: 12px !important;
     padding: 14px 18px !important;
-    backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(8px) !important;
     box-shadow: 0 8px 24px -6px rgba(2, 12, 27, 0.6) !important;
     transition: transform 0.2s ease, border-color 0.2s ease !important;
 }
@@ -36,7 +187,7 @@ div[data-testid="stMetric"]:hover {
 }
 
 div[data-testid="stMetric"] label {
-    color: #00d2ff !important;
+    color: #22d3ee !important;
     font-size: 0.8rem !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
@@ -45,16 +196,45 @@ div[data-testid="stMetric"] label {
 
 /* Dataframe glass styling */
 div[data-testid="stDataFrame"] {
-    background: rgba(10, 25, 47, 0.7) !important;
+    background: rgba(10, 20, 40, .55) !important;
     border-radius: 12px !important;
-    border: 1px solid rgba(0, 210, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, .08) !important;
     overflow: hidden !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+div[data-testid="stTable"],
+div[data-testid="stPlotlyChart"],
+div[data-testid="stVerticalBlockBorderWrapper"],
+div[data-testid="stExpander"],
+details[data-testid="stExpander"] {
+    background: rgba(10, 20, 40, .55) !important;
+    border: 1px solid rgba(255, 255, 255, .08) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+div[data-testid="stPlotlyChart"] .js-plotly-plot,
+div[data-testid="stPlotlyChart"] .plot-container,
+div[data-testid="stPlotlyChart"] .svg-container {
+    background: transparent !important;
 }
 
 /* Sidebar styling */
 section[data-testid="stSidebar"] {
-    background-color: #06101e !important;
+    background: rgba(8, 16, 32, .7) !important;
     border-right: 1px solid rgba(0, 210, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+@media (max-width: 767px) {
+    #bgvid {
+        display: none !important;
+    }
+
+    html, body {
+        background: linear-gradient(145deg, #0a1428, #0f1f3d 52%, #0b4b58) fixed !important;
+    }
 }
 
 /* Progress bar */

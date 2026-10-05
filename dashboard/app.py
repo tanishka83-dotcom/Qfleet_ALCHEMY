@@ -28,14 +28,26 @@ from dashboard.views import (
     page5_architecture,
     page6_plan_fleet,
 )
+from dashboard.background import inject_background, render_dashboard_header
 
 # Page configuration
 st.set_page_config(
-    page_title="QFleet — Maritime Fleet Optimization",
-    page_icon="⚓",
+    page_title="QFleet",
+    page_icon="🚢",
     layout="wide",
     initial_sidebar_state="expanded",
+    menu_items={
+        "About": (
+            "QFleet: Maritime fleet fuel-efficiency and emissions optimization. "
+            "SIH Problem Statement: SIH26138 — AI/ML & Quantum-Inspired "
+            "Optimisation for Maritime Fleet Fuel Efficiency and Emissions."
+        ),
+        "Get help": "https://github.com/tanishka83-dotcom",
+    },
 )
+
+# Keep one background element at the shared app root across page reruns.
+inject_background()
 
 # Load custom CSS if exists
 css_path = pathlib.Path(__file__).parent / "style.css"
@@ -62,6 +74,7 @@ def main() -> None:
         ],
         index=2,  # Default to Benchmark page
     )
+    render_dashboard_header(page_selection.partition(". ")[2])
 
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📋 System Info")

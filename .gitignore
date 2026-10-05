@@ -1,7 +1,25 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# Virtual environment
 .venv/
+venv/
+env/
+
+# Environment / secrets
 .env
+.env.*
+
+# Logs
 *.log
+
+# Python packages
 *.egg-info/
+
+# Local database
+data/*.db
+
+# IDE
+.vscode/
+.idea/

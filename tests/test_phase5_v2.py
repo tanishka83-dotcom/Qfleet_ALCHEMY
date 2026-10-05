@@ -18,7 +18,11 @@ from optimizer.problem import FleetOptimizationProblem
 from optimizer.problem_v2 import FleetOptimizationProblemV2, PORT_SHORE_PROFILES
 from optimizer.baselines import milp_optimize
 from optimizer.baselines_v2 import milp_optimize_v2
-from dashboard.views.page6_plan_fleet import validate_fleet_csv
+from dashboard.views.page6_plan_fleet import (
+    build_fuels_data,
+    results_csv_bytes,
+    validate_fleet_csv,
+)
 
 
 def test_problem_v2_route_options_and_shore_power():
@@ -61,6 +65,95 @@ def test_problem_v2_route_options_and_shore_power():
     assert entry0["port_cost"] > 0
     assert entry0["co2_port_t"] > 0
     assert entry0["used_shore_power"] is True
+
+
+def test_problem_v2_extended_fuels_default_preserves_standard_results():
+    routes = [{
+        "id": 1,
+        "name": "Default fuel regression",
+        "origin_port": "Rotterdam",
+        "dest_port": "Hamburg",
+        "distance_nm": 350.0,
+        "cargo_demand_teu": 1000,
+        "deadline_days": 3.0,
+        "route_options": [{
+            "option_id": 0, "name": "Direct", "dist_factor": 1.0,
+            "weather_factor": 1.0, "eca_fraction": 0.15,
+        }],
+    }]
+    vessels = [{
+        "id": 1, "name": "Test vessel", "vessel_class": "Feeder",
+        "capacity_teu": 1500, "design_speed_kn": 18.0,
+    }]
+    standard_fuels = [
+        {"id": 1, "name": "HFO", "price_usd_per_tonne": 580.0,
+         "lhv_mj_per_kg": 40.2, "co2_wtw_g_per_mj": 86.2},
+        {"id": 2, "name": "LNG", "price_usd_per_tonne": 720.0,
+         "lhv_mj_per_kg": 48.0, "co2_wtw_g_per_mj": 75.7},
+    ]
+    extended = [
+        {"id": 3, "name": "LH2_GREEN", "price_usd_per_tonne": 2800.0,
+         "lhv_mj_per_kg": 119.9, "co2_wtw_g_per_mj": 6.1},
+        {"id": 4, "name": "AMMONIA_GREEN", "price_usd_per_tonne": 1300.0,
+         "lhv_mj_per_kg": 18.6, "co2_wtw_g_per_mj": 3.5},
+    ]
+    kwargs = {
+        "routes": routes,
+        "vessels": vessels,
+        "weights": {"w1_fuel_cost": 1.0, "w2_co2_emission": 100.0},
+        "speed_bins": [0.8],
+    }
+    baseline = FleetOptimizationProblemV2(
+        **kwargs, fuels=standard_fuels, instance_name="Fuel-default-regression"
+    )
+    default_with_extended_input = FleetOptimizationProblemV2(
+        **kwargs,
+        fuels=standard_fuels + extended,
+        instance_name="Fuel-default-regression",
+    )
+
+    assert default_with_extended_input.num_fuels == baseline.num_fuels == 2
+    assert default_with_extended_input.fuels == baseline.fuels
+    plan = [{
+        "route_id": 1, "route_option_id": 0, "vessel_id": 1,
+        "speed_kn": 14.4, "fuel_id": 1,
+    }]
+    assert default_with_extended_input.evaluate(plan) == baseline.evaluate(plan)
+
+    enabled = FleetOptimizationProblemV2(
+        **kwargs,
+        fuels=standard_fuels + extended,
+        instance_name="Fuel-extended-regression",
+        extended_fuels=True,
+    )
+    assert enabled.num_fuels == 4
+    assert {fuel["name"] for fuel in enabled.fuels} >= set(config.EXTENDED_FUELS)
+
+
+def test_live_extended_fuel_records_use_finite_price_proxies():
+    fuel_df = pd.DataFrame([
+        {"id": 1, "name": "HFO", "price_usd_per_tonne": np.nan,
+         "lhv_mj_per_kg": 40.2, "co2_wtw_g_per_mj": 86.2},
+        {"id": 6, "name": "LH2_GREEN", "price_usd_per_tonne": 2800.0,
+         "lhv_mj_per_kg": 119.9, "co2_wtw_g_per_mj": 6.1},
+    ])
+
+    result = build_fuels_data(
+        fuel_df, config.SIMULATION_FUELS + config.EXTENDED_FUELS
+    )
+
+    assert result[0]["price_usd_per_tonne"] == config.BUNKER_PRICES_USD_PER_TONNE["HFO"]
+    assert result[1]["price_usd_per_tonne"] == 2800.0
+    assert all(np.isfinite(fuel["price_usd_per_tonne"]) for fuel in result)
+
+
+def test_page6_results_csv_contains_displayed_summary():
+    csv_bytes = results_csv_bytes(pd.DataFrame([
+        {"Algorithm": "MILP", "Objective ($)": "$1,000", "Runtime (s)": "0.25"},
+    ]))
+
+    assert csv_bytes.startswith(b"Algorithm,Objective ($),Runtime (s)")
+    assert b'MILP,"$1,000",0.25' in csv_bytes
 
 
 def test_problem_v2_regression_against_v1():

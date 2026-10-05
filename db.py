@@ -98,6 +98,21 @@ class Fuel(Base):
     created_at       = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
+class ExtendedFuelProxy(Base):
+    __tablename__ = "extended_fuel_proxies"
+
+    id                   = Column(Integer, primary_key=True, autoincrement=True)
+    name                 = Column(String(60), nullable=False, unique=True)
+    lhv_mj_per_kg        = Column(Float, nullable=False)
+    co2_ttw_g_per_g      = Column(Float, nullable=False)
+    co2_wtw_g_per_mj     = Column(Float, nullable=False)
+    engine_eff_ratio     = Column(Float, nullable=False)
+    price_usd_per_tonne  = Column(Float, nullable=False)
+    cost_proxy_usd_per_gj = Column(Float, nullable=False)
+    source               = Column(String(1024), nullable=False)
+    created_at           = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
 class Route(Base):
     __tablename__ = "routes"
 
@@ -207,7 +222,7 @@ def _seed_vessels(session: Session) -> None:
 
 
 def _seed_fuels(session: Session) -> None:
-    """Insert one row per simulation fuel from config. Idempotent."""
+    """Insert one row per standard simulation fuel. Idempotent."""
     if session.query(Fuel).count() > 0:
         return
     source_note = (
@@ -225,6 +240,42 @@ def _seed_fuels(session: Session) -> None:
             co2_wtw_g_per_mj=config.CO2_WTW_G_CO2EQ_PER_MJ[fuel_name],
             engine_eff_ratio=config.ENGINE_EFFICIENCY_RATIO[fuel_name],
             source=source_note,
+        ))
+
+
+def _seed_extended_fuels(session: Session) -> None:
+    """Seed opt-in proxy fuels outside the canonical fuels table."""
+    existing = {
+        fuel.name for fuel in session.query(ExtendedFuelProxy.name).all()
+    }
+    for fuel_name in config.EXTENDED_FUELS:
+        if fuel_name in existing:
+            continue
+        if fuel_name == "LH2_GREEN":
+            source = (
+                "TODO_VERIFY TV-34/36/37/38/40 proxy: LHV per ISO 6976 and IMO "
+                "marine specifications; WTW per FuelEU Annex I and pathway-"
+                "specific JEC/IEA lifecycle assessment including liquefaction; "
+                "price per IEA hydrogen cost data and port bunker quotes; "
+                "efficiency per IMO technology data and engine sea trials."
+            )
+        else:
+            source = (
+                "TODO_VERIFY TV-35/36/37/39/41 proxy: LHV per IMO marine fuel "
+                "specifications; WTW per FuelEU Annex I and pathway-specific "
+                "JEC/IEA lifecycle assessment; price per IRENA/IEA green "
+                "ammonia cost data and port bunker quotes; efficiency per "
+                "MAN ES engine specifications and sea trials."
+            )
+        session.add(ExtendedFuelProxy(
+            name=fuel_name,
+            lhv_mj_per_kg=config.LHV_MJ_PER_KG[fuel_name],
+            co2_ttw_g_per_g=config.CO2_TTW_G_PER_G_FUEL[fuel_name],
+            co2_wtw_g_per_mj=config.CO2_WTW_G_CO2EQ_PER_MJ[fuel_name],
+            engine_eff_ratio=config.ENGINE_EFFICIENCY_RATIO[fuel_name],
+            price_usd_per_tonne=config.BUNKER_PRICES_USD_PER_TONNE[fuel_name],
+            cost_proxy_usd_per_gj=config.FUEL_COST_PROXY_USD_PER_GJ[fuel_name],
+            source=source,
         ))
 
 
@@ -256,11 +307,13 @@ def seed_db(session: Session | None = None) -> None:
         with Session(get_engine()) as s:
             _seed_vessels(s)
             _seed_fuels(s)
+            _seed_extended_fuels(s)
             _seed_routes(s)
             s.commit()
     else:
         _seed_vessels(session)
         _seed_fuels(session)
+        _seed_extended_fuels(session)
         _seed_routes(session)
         session.commit()
 

@@ -1,13 +1,4 @@
-"""
-QFleet Dashboard — Page 5: Architecture & Honest Audit
-=====================================================
-Displays:
-1. Measured AI/ML surrogate metrics strictly from SQLite prediction_metrics table.
-2. Speedup metric marked with TODO_VERIFY if not stored in DB.
-3. System architecture data flow.
-4. Measured benchmark results only.
-5. Explanations for QI-EA losing marked explicitly as HYPOTHESES (not findings).
-"""
+"""Interactive, read-only prediction benchmark explorer."""
 
 from __future__ import annotations
 
@@ -15,181 +6,153 @@ import json
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
-from dashboard.data_loader import (
-    load_prediction_benchmarks,
-    load_prediction_metrics,
-)
+
+from dashboard.background import configure_plotly_theme
+from dashboard.data_loader import load_prediction_benchmarks
+
+
+def split_category(split_name: str) -> str:
+    if split_name == "Random 80/20":
+        return "Random 80/20"
+    if "speed" in split_name.lower():
+        return "Speed range"
+    if split_name.startswith("Vessel class:"):
+        return "Vessel class"
+    return "Other"
+
+
+def filter_prediction_rows(
+    results: pd.DataFrame,
+    model_name: str | None = None,
+    split_name: str | None = None,
+) -> pd.DataFrame:
+    filtered = results.copy()
+    if model_name is not None:
+        filtered = filtered[filtered["model_name"] == model_name]
+    if split_name is not None:
+        filtered = filtered[filtered["split_name"] == split_name]
+    return filtered.reset_index(drop=True)
+
+
+def _reset_filters() -> None:
+    for key in ("p5_model", "p5_split_category", "p5_split_name"):
+        st.session_state.pop(key, None)
 
 
 def render() -> None:
-    st.title("🏗️ System Architecture & Scientific Audit")
-    st.caption("End-to-end data pipeline, measured surrogate metrics, and an honest scientific assessment of quantum-inspired heuristics.")
+    configure_plotly_theme()
+    st.title("Prediction Benchmark")
+    st.caption("Inspect persisted synthetic-data predictions by model and held-out split.")
+    st.warning(
+        "Synthetic voyage data only. Results describe the generator and do not "
+        "establish real-world fleet accuracy."
+    )
 
-    # -----------------------------------------------------------------------
-    # Measured Surrogate Metrics (from SQLite DB)
-    # -----------------------------------------------------------------------
-    st.subheader("🤖 Measured AI/ML Surrogate Model Metrics (from SQLite DB)")
-    metrics_df = load_prediction_metrics()
-    
-    # Get the latest unique model metrics
-    latest_metrics = metrics_df.drop_duplicates(subset=["model_name"]).sort_values("r2", ascending=False)
-    
-    disp_metrics = latest_metrics[["model_name", "r2", "rmse", "mae", "run_at"]].copy()
-    disp_metrics.columns = ["Surrogate Architecture", "R² Score", "RMSE (t fuel)", "MAE (t fuel)", "Evaluation Timestamp"]
-    disp_metrics["R² Score"] = disp_metrics["R² Score"].apply(lambda x: f"{x:.6f}")
-    disp_metrics["RMSE (t fuel)"] = disp_metrics["RMSE (t fuel)"].apply(lambda x: f"{x:.4f}")
-    disp_metrics["MAE (t fuel)"] = disp_metrics["MAE (t fuel)"].apply(lambda x: f"{x:.4f}")
-    
-    st.dataframe(disp_metrics, use_container_width=True, hide_index=True)
+    results = load_prediction_benchmarks()
+    if results.empty:
+        st.info("No stored prediction benchmark is available. Run the prediction benchmark first.")
+        return
 
-    st.subheader("Synthetic Fuel-Prediction Benchmark")
+    model_options = sorted(results["model_name"].dropna().unique().tolist())
+    category_options = [
+        category for category in ("Random 80/20", "Speed range", "Vessel class")
+        if results["split_name"].map(split_category).eq(category).any()
+    ]
+    st.sidebar.subheader("Prediction filters")
+    st.sidebar.button("Reset filters", key="p5_reset_filters", on_click=_reset_filters)
+    if st.session_state.get("p5_model") not in model_options:
+        st.session_state["p5_model"] = model_options[0]
+    if st.session_state.get("p5_split_category") not in category_options:
+        st.session_state["p5_split_category"] = category_options[0]
+    st.sidebar.selectbox("Model", model_options, key="p5_model")
+    st.sidebar.selectbox("Split type", category_options, key="p5_split_category")
+
+    split_options = sorted(
+        name for name in results["split_name"].dropna().unique().tolist()
+        if split_category(name) == st.session_state["p5_split_category"]
+    )
+    if st.session_state.get("p5_split_name") not in split_options:
+        st.session_state["p5_split_name"] = split_options[0]
+    st.sidebar.selectbox("Evaluation split", split_options, key="p5_split_name")
+
+    split_rows = filter_prediction_rows(results, split_name=st.session_state["p5_split_name"])
+    model_rows = filter_prediction_rows(
+        split_rows, model_name=st.session_state["p5_model"]
+    )
+    selected = model_rows.iloc[0]
+    actual = json.loads(selected["y_true_json"])
+    predicted = json.loads(selected["y_pred_json"])
+
+    metric_table = split_rows[["model_name", "r2", "rmse", "mae"]].rename(columns={
+        "model_name": "Model",
+        "r2": "R²",
+        "rmse": "RMSE (t fuel)",
+        "mae": "MAE (t fuel)",
+    }).sort_values("MAE (t fuel)")
+    best = metric_table.iloc[0]
+    kpis = st.columns(4)
+    kpis[0].metric("Test samples", len(actual))
+    kpis[1].metric("R²", f"{float(selected['r2']):.4f}")
+    kpis[2].metric("RMSE", f"{float(selected['rmse']):,.3f} t")
+    kpis[3].metric("MAE", f"{float(selected['mae']):,.3f} t")
     st.caption(
-        "Synthetic voyage data only. Scores describe the data generator and "
-        "do not establish real-world fleet accuracy."
-    )
-    benchmark_df = load_prediction_benchmarks()
-    if benchmark_df.empty:
-        st.info(
-            "No benchmark results are available. Run "
-            "models/prediction_benchmark.py to populate them."
-        )
-    else:
-        metric_columns = benchmark_df[
-            ["split_name", "model_name", "r2", "rmse", "mae"]
-        ].rename(columns={
-            "split_name": "Evaluation split",
-            "model_name": "Model",
-            "r2": "R²",
-            "rmse": "RMSE (t)",
-            "mae": "MAE (t)",
-        })
-        st.dataframe(
-            metric_columns,
-            use_container_width=True,
-            hide_index=True,
-        )
-
-        split_names = sorted(benchmark_df["split_name"].unique())
-        selected_split = st.selectbox("Evaluation split", split_names)
-        split_metrics = benchmark_df[
-            benchmark_df["split_name"] == selected_split
-        ].sort_values("mae")
-        model_names = split_metrics["model_name"].tolist()
-        selected_model = st.selectbox("Model", model_names, index=0)
-        selected_row = split_metrics[
-            split_metrics["model_name"] == selected_model
-        ].iloc[0]
-        actual = json.loads(selected_row["y_true_json"])
-        predicted = json.loads(selected_row["y_pred_json"])
-        plot_df = pd.DataFrame({
-            "Actual fuel (t)": actual,
-            "Predicted fuel (t)": predicted,
-        })
-        plot_df["Residual (t)"] = (
-            plot_df["Predicted fuel (t)"] - plot_df["Actual fuel (t)"]
-        )
-
-        chart_col, residual_col = st.columns(2)
-        with chart_col:
-            scatter = px.scatter(
-                plot_df,
-                x="Actual fuel (t)",
-                y="Predicted fuel (t)",
-                labels={
-                    "Actual fuel (t)": "Actual fuel (t)",
-                    "Predicted fuel (t)": "Predicted fuel (t)",
-                },
-            )
-            axis_min = min(actual + predicted)
-            axis_max = max(actual + predicted)
-            scatter.add_shape(
-                type="line", x0=axis_min, y0=axis_min,
-                x1=axis_max, y1=axis_max,
-                line={"color": "#d95f02", "dash": "dash"},
-            )
-            st.plotly_chart(scatter, use_container_width=True)
-        with residual_col:
-            histogram = px.histogram(
-                plot_df,
-                x="Residual (t)",
-                labels={"Residual (t)": "Predicted - actual fuel (t)"},
-            )
-            st.plotly_chart(histogram, use_container_width=True)
-
-        best_row = split_metrics.iloc[0]
-        selected_rank = (
-            split_metrics["model_name"].tolist().index(selected_model) + 1
-        )
-        st.markdown(
-            f"**Takeaway:** {best_row['model_name']} had the lowest MAE on "
-            f"{selected_split} ({best_row['mae']:.3f} t); "
-            f"{selected_model} ranked {selected_rank} of {len(split_metrics)}."
-        )
-
-    # Note on inference speedup
-    st.info(
-        "⚡ **Surrogate Inference Speedup**: "
-        "Measured surrogate lookup table builds in ~0.027s–0.066s per instance. "
-        "`TODO_VERIFY TV-30`: Detailed millisecond per-query inference speedup vs raw hydrodynamic CFD simulation is an engineering estimate ($>10^4\\times$ faster than numerical ODE solvers)."
+        f"{best['Model']} has the lowest MAE on {selected['split_name']} "
+        f"({best['MAE (t fuel)']:,.3f} t); selected model "
+        f"{selected['model_name']} has MAE {float(selected['mae']):,.3f} t."
     )
 
-    st.markdown("---")
+    st.subheader("Metrics by model")
+    st.download_button(
+        "Download filtered metrics CSV",
+        metric_table.to_csv(index=False).encode("utf-8"),
+        file_name="qfleet_p5_prediction_metrics.csv",
+        mime="text/csv",
+        key="p5_metrics_csv",
+    )
+    st.dataframe(metric_table, use_container_width=True, hide_index=True, key="p5_metrics_table")
 
-    # -----------------------------------------------------------------------
-    # System Architecture Data Flow
-    # -----------------------------------------------------------------------
-    st.subheader("🔄 System Architecture & Data Pipeline")
-    st.graphviz_chart("""
-    digraph G {
-        rankdir=LR;
-        bgcolor="transparent";
-        node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11];
-
-        A [label="Maritime Routes\n& Vessel DB", fillcolor="#e0f2fe"];
-        B [label="Hybrid Physics +\nXGBoost Surrogate", fillcolor="#dbeafe"];
-        C [label="Precomputed Grid Cache\n600-entry shared table", fillcolor="#c7d2fe"];
-        D [label="Optimization\nAlgorithms", fillcolor="#a5b4fc"];
-        E [label="1. Deterministic\nMILP HiGHS / Greedy", fillcolor="#86efac"];
-        F [label="2. Classical\nMetaheuristic: GA", fillcolor="#93c5fd"];
-        G [label="3. Quantum-Inspired\nSQA / QI-EA", fillcolor="#c4b5fd"];
-        H [label="SQLite Optimization\nRuns DB", fillcolor="#fde68a"];
-        I [label="Streamlit Dashboard\n(mode=ro)", fillcolor="#fca5a5"];
-
-        A -> B;
-        B -> C;
-        C -> D;
-        D -> E;
-        D -> F;
-        D -> G;
-        E -> H;
-        F -> H;
-        G -> H;
-        H -> I;
-    }
-    """, use_container_width=True)
-
-    st.markdown("---")
-
-    # -----------------------------------------------------------------------
-    # Honest Scientific Assessment & Audit
-    # -----------------------------------------------------------------------
-    st.subheader("⚖️ Empirical Benchmark Findings vs Hypotheses")
-    
-    st.markdown("### 1. Measured Experimental Facts (Empirical Ground Truth)")
-    st.success("""
-- **Fact 1 (MILP Dominance)**: SciPy HiGHS solves all benchmark instances (up to 15 vessels, 30 routes) to global mathematical optimality in $<3.0$ seconds.
-- **Fact 2 (GA vs Quantum-Inspired)**: Classical Genetic Algorithm consistently finds superior objective solutions and maintains higher feasibility rates than SQA and QI-EA under equal evaluation budgets.
-- **Fact 3 (QI-EA Scaling Deficit)**: Under identical budgets (1,000 / 5,000 / 10,000 evals), QI-EA exhibits higher variance and larger optimality gaps (29.6% on Small, 42.6% on Medium, 48.0% on Large vs MILP). Pairwise Wilcoxon tests confirm this is statistically significant ($p < 0.01$).
-""")
-
-    st.markdown(r"""### 2. Hypotheses for QI-EA Performance (Not Proven Findings)
-The following are **hypotheses** proposed to explain the empirical performance delta:
-
-- **Hypothesis 1 (Continuous Angle Space in Combinatorial Problems)**: 
-  QI-EA represents solutions as quantum rotation angles $\theta \in [0, \pi/2]$. When mapped to discrete vessel assignments via probability collapse $\sin^2(\theta)$, small continuous rotations may fail to bridge discrete fitness barriers as effectively as discrete crossover operators.
-- **Hypothesis 2 (Evaluation Budget Saturation)**: 
-  Quantum-inspired rotation operators may require higher sample budgets or specialized rotation-angle schedules ($\Delta\theta$) to converge on constrained multi-vessel topologies.
-- **Hypothesis 3 (Constraint Geometry & Feasibility Repairs)**: 
-  The presence of global coupling constraints (shared vessel quotas and binding fleet CO₂ caps) creates non-convex, disjoint feasible regions. Classical GA operators combined with greedy heuristics appear better suited to navigating these specific boundary boundaries under tight budgets.
-""")
+    plot_data = pd.DataFrame({
+        "Actual fuel (t)": actual,
+        "Predicted fuel (t)": predicted,
+    })
+    plot_data["Residual (t)"] = (
+        plot_data["Predicted fuel (t)"] - plot_data["Actual fuel (t)"]
+    )
+    chart_col, residual_col = st.columns(2)
+    with chart_col:
+        scatter = px.scatter(
+            plot_data,
+            x="Actual fuel (t)",
+            y="Predicted fuel (t)",
+            hover_data={
+                "Actual fuel (t)": ":,.3f",
+                "Predicted fuel (t)": ":,.3f",
+                "Residual (t)": ":,.3f",
+            },
+            labels={
+                "Actual fuel (t)": "Actual fuel (t)",
+                "Predicted fuel (t)": "Predicted fuel (t)",
+            },
+            title=f"Actual vs predicted — {selected['model_name']}",
+        )
+        axis_min = min(actual + predicted)
+        axis_max = max(actual + predicted)
+        scatter.add_shape(
+            type="line", x0=axis_min, y0=axis_min,
+            x1=axis_max, y1=axis_max,
+            line={"color": "#fbbf24", "dash": "dash"},
+        )
+        scatter.update_layout(clickmode="event+select", height=420)
+        st.plotly_chart(scatter, use_container_width=True, key="p5_actual_predicted")
+    with residual_col:
+        residual_fig = px.histogram(
+            plot_data,
+            x="Residual (t)",
+            hover_data={"Residual (t)": ":,.3f"},
+            labels={"Residual (t)": "Predicted − actual fuel (t)"},
+            title="Prediction residuals",
+        )
+        residual_fig.update_layout(clickmode="event+select", height=420)
+        st.plotly_chart(residual_fig, use_container_width=True, key="p5_residuals")

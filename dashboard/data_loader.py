@@ -18,6 +18,7 @@ import json
 import sqlite3
 import pathlib
 import pandas as pd
+import streamlit as st
 from typing import Any
 
 _ROOT = pathlib.Path(__file__).parent.parent
@@ -32,6 +33,7 @@ def get_ro_connection() -> sqlite3.Connection:
     return sqlite3.connect(db_uri, uri=True)
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_fuels() -> pd.DataFrame:
     """Loads all fuels from SQLite fuels table."""
     with get_ro_connection() as conn:
@@ -39,6 +41,21 @@ def load_fuels() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=60, show_spinner=False)
+def load_extended_fuel_proxies() -> pd.DataFrame:
+    """Loads optional hydrogen/ammonia proxy records when the table exists."""
+    with get_ro_connection() as conn:
+        tables = pd.read_sql(
+            "SELECT name FROM sqlite_master WHERE type='table'", conn
+        )["name"].tolist()
+        if "extended_fuel_proxies" not in tables:
+            return pd.DataFrame()
+        return pd.read_sql(
+            "SELECT * FROM extended_fuel_proxies ORDER BY id ASC", conn
+        )
+
+
+@st.cache_data(ttl=60, show_spinner=False)
 def load_vessels() -> pd.DataFrame:
     """Loads all vessels from SQLite vessels table."""
     with get_ro_connection() as conn:
@@ -46,6 +63,7 @@ def load_vessels() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_routes() -> pd.DataFrame:
     """Loads all routes from SQLite routes table."""
     with get_ro_connection() as conn:
@@ -53,6 +71,7 @@ def load_routes() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_scenarios() -> pd.DataFrame:
     """Loads scenario definitions and parses JSON configs."""
     with get_ro_connection() as conn:
@@ -60,6 +79,7 @@ def load_scenarios() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_prediction_metrics() -> pd.DataFrame:
     """Loads surrogate model evaluation metrics from SQLite."""
     with get_ro_connection() as conn:
@@ -67,6 +87,7 @@ def load_prediction_metrics() -> pd.DataFrame:
     return df
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_prediction_benchmarks() -> pd.DataFrame:
     """Load the latest split-level prediction benchmark, if it exists."""
     with get_ro_connection() as conn:
@@ -97,6 +118,7 @@ def load_statistical_tests() -> pd.DataFrame:
     return pd.read_csv(STAT_CSV_PATH)
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_optimization_runs_audit() -> dict[str, Any]:
     """
     Audits all 658 optimization runs in the SQLite database:
@@ -149,6 +171,7 @@ def load_optimization_runs_audit() -> dict[str, Any]:
     }
 
 
+@st.cache_data(ttl=60, show_spinner=False)
 def load_scenario_detail(scenario_id: int) -> dict[str, Any]:
     """Extracts parsed scenario configuration and resolved vessels and routes."""
     with get_ro_connection() as conn:

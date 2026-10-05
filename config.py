@@ -85,10 +85,22 @@ LHV_MJ_PER_KG: dict[str, float] = {
 
     "AMMONIA":  18.6,
     # SOURCE: IMO 4th GHG Study (2020), Table 5.1.
+    # TODO_VERIFY TV-35: Confirm the ammonia LHV used for the green-fuel
+    #   proxy against the applicable IMO fuel-quality specification.
 
     "LH2":     119.9,
     # SOURCE: IMO 4th GHG Study (2020), Table 5.1 (gaseous H2 LHV;
     #         liquefaction changes density, not LHV).
+    # TODO_VERIFY TV-34: Confirm the LH2 LHV basis against ISO 6976 and an
+    #   IMO-recognized marine fuel specification before operational use.
+
+    "AMMONIA_GREEN": 18.6,
+    # TODO_VERIFY TV-35: Proxy copied from ammonia LHV; verify against an
+    #   IMO-recognized marine fuel specification and account for fuel purity.
+
+    "LH2_GREEN": 119.9,
+    # TODO_VERIFY TV-34: Proxy copied from hydrogen LHV; verify against
+    #   ISO 6976 and an IMO-recognized marine fuel specification.
 }
 
 # Reference fuel for all VLSFO-equivalent normalisation
@@ -97,6 +109,7 @@ LHV_VLSFO_MJ_PER_KG: float = LHV_MJ_PER_KG["VLSFO"]
 
 # Fuels that appear in the simulation (subset of all defined fuels)
 SIMULATION_FUELS: list[str] = ["HFO", "VLSFO", "MGO", "LNG", "METHANOL"]
+EXTENDED_FUELS: list[str] = ["LH2_GREEN", "AMMONIA_GREEN"]
 
 
 # ---------------------------------------------------------------------------
@@ -125,9 +138,21 @@ CO2_TTW_G_PER_G_FUEL: dict[str, float] = {
 
     "AMMONIA":  0.000,
     # No carbon content. SOURCE: IMO 4th GHG Study (2020), Section 5.
+    # TODO_VERIFY TV-36: Confirm zero TTW CO2 against IMO MEPC.212(63)
+    #   carbon-content conventions and account separately for N2O emissions.
 
     "LH2":      0.000,
     # No carbon content. SOURCE: IMO 4th GHG Study (2020), Section 5.
+    # TODO_VERIFY TV-37: Confirm zero TTW CO2 against IMO MEPC.212(63)
+    #   carbon-content conventions for the selected hydrogen pathway.
+
+    "AMMONIA_GREEN": 0.000,
+    # TODO_VERIFY TV-36: Proxy based on ammonia containing no carbon; verify
+    #   against IMO MEPC.212(63) and account separately for N2O emissions.
+
+    "LH2_GREEN": 0.000,
+    # TODO_VERIFY TV-37: Proxy based on hydrogen containing no carbon; verify
+    #   against IMO MEPC.212(63) for the selected hydrogen pathway.
 }
 
 
@@ -175,15 +200,15 @@ CO2_WTW_G_CO2EQ_PER_MJ: dict[str, float] = {
     #   Not a regulatory document.
 
     "AMMONIA_GREEN":     3.5,
-    # TODO_VERIFY TV-07: Green ammonia (Haber-Bosch + green H2) WTW factor.
+    # TODO_VERIFY TV-07: Verify against FuelEU Maritime Annex I and a
+    #   pathway-specific JEC Well-to-Wheels lifecycle assessment.
     #   Range is 2–6 g CO2eq/MJ depending on H2 production pathway per ICCT
     #   Working Paper 2022-28. Using midpoint estimate.
 
     "LH2_GREEN":         6.1,
-    # TODO_VERIFY TV-08: Green liquefied H2. Depends on liquefaction energy
-    #   penalty (typically 25–35% of LHV) and H2 production route. Value from
-    #   IRENA (2022) "Global Hydrogen Trade to Meet the 1.5°C Climate Goal",
-    #   Fig. 3.2. Not a regulatory document.
+    # TODO_VERIFY TV-08: Verify against FuelEU Maritime Annex I and a
+    #   pathway-specific JEC/IEA lifecycle assessment, including liquefaction.
+    #   Proxy informed by IRENA (2022), Fig. 3.2.
 }
 
 
@@ -242,6 +267,14 @@ ENGINE_EFFICIENCY_RATIO: dict[str, float] = {
     #   engines still experimental at commercial scale. Broad range in
     #   literature. IMO 4th GHG Study (2020), Chapter 4 technology assessment,
     #   reports conversion efficiencies of 45–65% for H2 combustion engines.
+
+    "AMMONIA_GREEN": 0.82,
+    # TODO_VERIFY TV-41: Verify net engine efficiency and pilot-fuel demand
+    #   against MAN ES ammonia engine specifications and sea-trial data.
+
+    "LH2_GREEN": 0.70,
+    # TODO_VERIFY TV-40: Verify net engine efficiency against IMO 4th GHG
+    #   Study technology data and marine hydrogen engine sea trials.
 }
 
 
@@ -473,9 +506,16 @@ BUNKER_PRICES_USD_PER_TONNE: dict[str, float] = {
     "METHANOL":         890.0,
     "METHANOL_GREEN":  1600.0,
     "AMMONIA_FOSSIL":   700.0,
-    "AMMONIA_GREEN":   1300.0,
-    "LH2_GREEN":       2800.0,
+    "AMMONIA_GREEN":   1300.0,  # TODO_VERIFY TV-39: IRENA/IEA green ammonia cost data and port bunker quotes.
+    "LH2_GREEN":       2800.0,  # TODO_VERIFY TV-38: IEA hydrogen cost data and liquefied-H2 port bunker quotes.
 }
+
+FUEL_COST_PROXY_USD_PER_GJ: dict[str, float] = {
+    fuel: BUNKER_PRICES_USD_PER_TONNE[fuel] / LHV_MJ_PER_KG[fuel]
+    for fuel in EXTENDED_FUELS
+}
+# TODO_VERIFY TV-38/TV-39: Energy-normalized costs inherit the uncertainty of
+#   the fuel price proxies and LHV values above.
 
 # Multi-objective weights for composite objective:
 # J = w1 * FuelCost ($) + w2 * LifecycleCO2 ($/tonne) + w3 * Delay ($/day)
@@ -568,6 +608,18 @@ TODO_VERIFY_ITEMS: list[str] = [
         "dependent (range 2–6 per ICCT 2022-28).",
     "TV-08  Green LH2 WTW factor (6.1 g CO2eq/MJ): Depends on liquefaction "
         "energy penalty and H2 production route; sourced from IRENA 2022.",
+    "TV-34  Green LH2 LHV (119.9 MJ/kg): Verify against ISO 6976 and an "
+        "IMO-recognized marine fuel specification.",
+    "TV-35  Green ammonia LHV (18.6 MJ/kg): Verify against an IMO-recognized "
+        "marine fuel specification and fuel-purity data.",
+    "TV-36/37  Hydrogen/ammonia TTW CO2 factors (0 g/g): Verify against IMO "
+        "MEPC.212(63); assess ammonia N2O separately.",
+    "TV-38  Green LH2 price ($2,800/t): Verify against IEA hydrogen cost "
+        "data and actual liquefied-hydrogen port bunker quotes.",
+    "TV-39  Green ammonia price ($1,300/t): Verify against IRENA/IEA green "
+        "ammonia cost data and actual port bunker quotes.",
+    "TV-40/41  Green LH2/ammonia engine-efficiency ratios (0.70/0.82): "
+        "Verify against marine engine specifications and sea-trial data.",
     # Engine efficiency ratios
     "TV-09  HFO engine efficiency ratio (0.99): Indicative; DNV GL 2019-0567.",
     "TV-10  MGO engine efficiency ratio (1.02): Indicative; DNV GL 2019-0567.",

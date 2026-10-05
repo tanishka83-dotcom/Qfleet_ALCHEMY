@@ -23,7 +23,12 @@ import plotly.graph_objects as go
 from typing import Any
 
 import config
-from dashboard.data_loader import load_vessels, load_routes, load_fuels
+from dashboard.data_loader import (
+    load_vessels,
+    load_routes,
+    load_fuels,
+    load_extended_fuel_proxies,
+)
 from optimizer.problem_v2 import FleetOptimizationProblemV2, PORT_SHORE_PROFILES
 from optimizer.baselines_v2 import milp_optimize_v2
 from optimizer.algorithms_v2 import (
@@ -56,6 +61,34 @@ def validate_fleet_csv(file_or_buffer: Any) -> tuple[pd.DataFrame | None, str | 
         return df, None
     except Exception as e:
         return None, f"Error parsing CSV: {e}"
+
+
+def build_fuels_data(
+    fuel_df: pd.DataFrame,
+    eligible_fuel_names: list[str],
+) -> list[dict[str, Any]]:
+    """Build optimizer fuel records with configured prices for standard fuels."""
+    fuels_data = []
+    for _, fuel in fuel_df.iterrows():
+        name = str(fuel["name"])
+        if name not in eligible_fuel_names:
+            continue
+        price = fuel.get("price_usd_per_tonne")
+        if pd.isna(price):
+            price = config.BUNKER_PRICES_USD_PER_TONNE.get(name, 650.0)
+        fuels_data.append({
+            "id": int(fuel["id"]),
+            "name": name,
+            "price_usd_per_tonne": float(price),
+            "lhv_mj_per_kg": float(fuel["lhv_mj_per_kg"]),
+            "co2_wtw_g_per_mj": float(fuel["co2_wtw_g_per_mj"]),
+        })
+    return fuels_data
+
+
+def results_csv_bytes(results: pd.DataFrame) -> bytes:
+    """Serialize the displayed optimization summary for download."""
+    return results.to_csv(index=False).encode("utf-8")
 
 
 def render() -> None:
@@ -136,17 +169,30 @@ def render() -> None:
                     "design_speed_kn": float(v["design_speed_kn"]),
                 })
 
+    # Fuel scenario
+    include_extended_fuels = st.checkbox(
+        "Include hydrogen and ammonia (extended scenario)",
+        value=False,
+        key="page6_extended_fuels",
+    )
+    st.caption(
+        "Hydrogen and ammonia use unverified pathway and cost proxies; "
+        "fuel-consumption estimates are not validated for these fuels."
+    )
+    eligible_fuel_names = list(config.SIMULATION_FUELS)
+    if include_extended_fuels:
+        eligible_fuel_names.extend(config.EXTENDED_FUELS)
+        proxy_fuels = load_extended_fuel_proxies()
+        if proxy_fuels.empty:
+            st.warning(
+                "Extended fuel proxy data is not initialized. Run "
+                "python -m db before enabling the extended scenario."
+            )
+        else:
+            db_fuels = pd.concat([db_fuels, proxy_fuels], ignore_index=True)
+
     # Fuels list
-    fuels_data = [
-        {
-            "id": int(f["id"]),
-            "name": str(f["name"]),
-            "price_usd_per_tonne": float(f.get("price_usd_per_tonne") or __import__("config").BUNKER_PRICES_USD_PER_TONNE.get(f["name"], 650.0)),
-            "lhv_mj_per_kg": float(f["lhv_mj_per_kg"]),
-            "co2_wtw_g_per_mj": float(f["co2_wtw_g_per_mj"]),
-        }
-        for _, f in db_fuels.iterrows() if f["name"] in config.SIMULATION_FUELS
-    ]
+    fuels_data = build_fuels_data(db_fuels, eligible_fuel_names)
 
     # -----------------------------------------------------------------------
     # Step 2: Policy & Constraints
@@ -182,6 +228,7 @@ def render() -> None:
                 routes=routes_data,
                 vessels=vessels_data,
                 fuels=fuels_data,
+                extended_fuels=include_extended_fuels,
                 weights=weights,
                 emissions_cap_t=cap_input if enable_cap else None,
                 vessel_limits=vessel_limits,
@@ -306,7 +353,15 @@ def render() -> None:
                 "Gap to MILP": f"{((naive_obj - milp_obj)/milp_obj)*100:+.2f}%" if (naive_feas and milp_stats.get("is_feasible")) else "--",
             })
 
-            st.dataframe(pd.DataFrame(summary_rows), use_container_width=True, hide_index=True)
+            summary_df = pd.DataFrame(summary_rows)
+            st.download_button(
+                "Download optimization results CSV",
+                results_csv_bytes(summary_df),
+                file_name="qfleet_page6_optimization_results.csv",
+                mime="text/csv",
+                key="p6_results_csv",
+            )
+            st.dataframe(summary_df, use_container_width=True, hide_index=True)
 
             # ------ Baseline savings KPI ------
             if milp_stats.get("is_feasible", False):
