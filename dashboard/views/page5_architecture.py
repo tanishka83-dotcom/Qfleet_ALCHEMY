@@ -11,9 +11,15 @@ Displays:
 
 from __future__ import annotations
 
-import streamlit as st
+import json
+
 import pandas as pd
-from dashboard.data_loader import load_prediction_metrics
+import plotly.express as px
+import streamlit as st
+from dashboard.data_loader import (
+    load_prediction_benchmarks,
+    load_prediction_metrics,
+)
 
 
 def render() -> None:
@@ -36,6 +42,90 @@ def render() -> None:
     disp_metrics["MAE (t fuel)"] = disp_metrics["MAE (t fuel)"].apply(lambda x: f"{x:.4f}")
     
     st.dataframe(disp_metrics, use_container_width=True, hide_index=True)
+
+    st.subheader("Synthetic Fuel-Prediction Benchmark")
+    st.caption(
+        "Synthetic voyage data only. Scores describe the data generator and "
+        "do not establish real-world fleet accuracy."
+    )
+    benchmark_df = load_prediction_benchmarks()
+    if benchmark_df.empty:
+        st.info(
+            "No benchmark results are available. Run "
+            "models/prediction_benchmark.py to populate them."
+        )
+    else:
+        metric_columns = benchmark_df[
+            ["split_name", "model_name", "r2", "rmse", "mae"]
+        ].rename(columns={
+            "split_name": "Evaluation split",
+            "model_name": "Model",
+            "r2": "R²",
+            "rmse": "RMSE (t)",
+            "mae": "MAE (t)",
+        })
+        st.dataframe(
+            metric_columns,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+        split_names = sorted(benchmark_df["split_name"].unique())
+        selected_split = st.selectbox("Evaluation split", split_names)
+        split_metrics = benchmark_df[
+            benchmark_df["split_name"] == selected_split
+        ].sort_values("mae")
+        model_names = split_metrics["model_name"].tolist()
+        selected_model = st.selectbox("Model", model_names, index=0)
+        selected_row = split_metrics[
+            split_metrics["model_name"] == selected_model
+        ].iloc[0]
+        actual = json.loads(selected_row["y_true_json"])
+        predicted = json.loads(selected_row["y_pred_json"])
+        plot_df = pd.DataFrame({
+            "Actual fuel (t)": actual,
+            "Predicted fuel (t)": predicted,
+        })
+        plot_df["Residual (t)"] = (
+            plot_df["Predicted fuel (t)"] - plot_df["Actual fuel (t)"]
+        )
+
+        chart_col, residual_col = st.columns(2)
+        with chart_col:
+            scatter = px.scatter(
+                plot_df,
+                x="Actual fuel (t)",
+                y="Predicted fuel (t)",
+                labels={
+                    "Actual fuel (t)": "Actual fuel (t)",
+                    "Predicted fuel (t)": "Predicted fuel (t)",
+                },
+            )
+            axis_min = min(actual + predicted)
+            axis_max = max(actual + predicted)
+            scatter.add_shape(
+                type="line", x0=axis_min, y0=axis_min,
+                x1=axis_max, y1=axis_max,
+                line={"color": "#d95f02", "dash": "dash"},
+            )
+            st.plotly_chart(scatter, use_container_width=True)
+        with residual_col:
+            histogram = px.histogram(
+                plot_df,
+                x="Residual (t)",
+                labels={"Residual (t)": "Predicted - actual fuel (t)"},
+            )
+            st.plotly_chart(histogram, use_container_width=True)
+
+        best_row = split_metrics.iloc[0]
+        selected_rank = (
+            split_metrics["model_name"].tolist().index(selected_model) + 1
+        )
+        st.markdown(
+            f"**Takeaway:** {best_row['model_name']} had the lowest MAE on "
+            f"{selected_split} ({best_row['mae']:.3f} t); "
+            f"{selected_model} ranked {selected_rank} of {len(split_metrics)}."
+        )
 
     # Note on inference speedup
     st.info(

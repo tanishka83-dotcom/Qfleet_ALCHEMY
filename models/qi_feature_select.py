@@ -216,14 +216,16 @@ def evaluate_cv(
     vc_cols: list[str],
     ft_cols: list[str],
     seed: int,
+    n_folds: int | None = None,
+    cap_estimators: int | None = None,
 ) -> float:
     """
     Evaluate individual on training split only (CV MAE; higher = better).
 
     Uses inner_n_estimators cap for runtime.  Returns negative MAE.
     """
-    n_folds   = config.QIEA_PARAMS["n_cv_folds"]
-    cap_est   = config.QIEA_PARAMS["inner_n_estimators"]
+    n_folds = n_folds or config.QIEA_PARAMS["n_cv_folds"]
+    cap_est = cap_estimators or config.QIEA_PARAMS["inner_n_estimators"]
 
     bits   = angles_to_bits(angles)
     X_sel  = apply_mask(X_train, bits, vc_cols, ft_cols)
@@ -305,12 +307,15 @@ def qiea(
     vc_cols: list[str],
     ft_cols: list[str],
     seed:    int,
+    search_params: dict | None = None,
+    evaluate_holdout: bool = True,
 ) -> dict:
-    """Run one QI-EA optimisation. CV on train only; final eval on test."""
+    """Run QI-EA with CV on train; optionally evaluate its selected model."""
+    search = {**config.QIEA_PARAMS, **(search_params or {})}
     rng      = np.random.default_rng(seed)
-    pop_size = config.QIEA_PARAMS["population_size"]
-    n_gen    = config.QIEA_PARAMS["n_generations"]
-    delta_theta = config.QIEA_PARAMS["rotation_delta"]
+    pop_size = search["population_size"]
+    n_gen    = search["n_generations"]
+    delta_theta = search["rotation_delta"]
 
     # Initialise population: θ ∈ [π/6, π/3]  (sin² ≈ 0.25–0.75; avoids edges)
     population = rng.uniform(np.pi / 6, np.pi / 3, size=(pop_size, N_ANGLES))
@@ -322,10 +327,14 @@ def qiea(
 
     for gen in range(n_gen):
         fitnesses = np.array([
-            evaluate_cv(ind, X_train, y_train, vc_cols, ft_cols, seed)
+            evaluate_cv(
+                ind, X_train, y_train, vc_cols, ft_cols, seed,
+                n_folds=search["n_cv_folds"],
+                cap_estimators=search["inner_n_estimators"],
+            )
             for ind in population
         ])
-        n_evals += pop_size * config.QIEA_PARAMS["n_cv_folds"]
+        n_evals += pop_size * search["n_cv_folds"]
 
         gen_best_idx = int(np.argmax(fitnesses))
         if fitnesses[gen_best_idx] > best_fitness:
@@ -357,8 +366,11 @@ def qiea(
                 ))
 
     runtime_s  = time.perf_counter() - t_start
-    test_mae   = evaluate_test(best_angles, X_train, y_train,
-                                X_test, y_test, vc_cols, ft_cols, seed)
+    test_mae = (
+        evaluate_test(best_angles, X_train, y_train,
+                      X_test, y_test, vc_cols, ft_cols, seed)
+        if evaluate_holdout else float("nan")
+    )
     best_bits  = angles_to_bits(best_angles)
     selected   = [FEATURE_GROUPS[i] for i in range(N_FG) if best_bits[i]]
     best_hp    = decode_hyperparams(best_angles, cap_estimators=None)

@@ -11,7 +11,8 @@ Tables
   scenarios          : optimisation scenario configs (fleet_config_json)
   optimization_runs  : per-run results (algorithm, seed, objective, CO2, etc.)
   benchmark_results  : aggregate algo benchmark metrics
-  prediction_metrics : ML model accuracy metrics (written by fuel_model.py)
+    prediction_metrics : ML model accuracy metrics (written by fuel_model.py)
+    prediction_benchmarks: split metrics and actual/predicted samples
 
 Usage
 -----
@@ -169,6 +170,20 @@ class PredictionMetric(Base):
     r2         = Column(Float, nullable=False,
                          comment="R² coefficient of determination")
     run_at     = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class PredictionBenchmark(Base):
+    __tablename__ = "prediction_benchmarks"
+
+    id           = Column(Integer, primary_key=True, autoincrement=True)
+    model_name   = Column(String(120), nullable=False)
+    split_name   = Column(String(120), nullable=False)
+    mae          = Column(Float, nullable=False)
+    rmse         = Column(Float, nullable=False)
+    r2           = Column(Float, nullable=False)
+    y_true_json  = Column(Text, nullable=False)
+    y_pred_json  = Column(Text, nullable=False)
+    run_at       = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ---------------------------------------------------------------------------

@@ -67,6 +67,22 @@ def load_prediction_metrics() -> pd.DataFrame:
     return df
 
 
+def load_prediction_benchmarks() -> pd.DataFrame:
+    """Load the latest split-level prediction benchmark, if it exists."""
+    with get_ro_connection() as conn:
+        tables = pd.read_sql(
+            "SELECT name FROM sqlite_master WHERE type='table'", conn
+        )["name"].tolist()
+        if "prediction_benchmarks" not in tables:
+            return pd.DataFrame()
+        return pd.read_sql(
+            "SELECT * FROM prediction_benchmarks "
+            "WHERE run_at = (SELECT MAX(run_at) FROM prediction_benchmarks) "
+            "ORDER BY split_name, model_name",
+            conn,
+        )
+
+
 def load_benchmark_csv() -> pd.DataFrame:
     """Loads Phase 3 summary results from data/benchmark_results.csv."""
     if not CSV_PATH.exists():
