@@ -50,19 +50,34 @@ def render() -> None:
     # System Architecture Data Flow
     # -----------------------------------------------------------------------
     st.subheader("🔄 System Architecture & Data Pipeline")
-    st.markdown("""
-```mermaid
-graph LR
-    A[Maritime Routes & Vessel DB] --> B[Hybrid Physics + XGBoost Surrogate]
-    B --> C[Precomputed Grid Cache 600-entry shared table]
-    C --> D[Optimization Algorithms]
-    D --> E[1. Deterministic: MILP HiGHS / Greedy]
-    D --> F[2. Classical Metaheuristic: GA]
-    D --> G[3. Quantum-Inspired: SQA / QI-EA]
-    E & F & G --> H[SQLite Optimization Runs DB]
-    H --> I[Streamlit Dashboard mode=ro]
-```
-""")
+    st.graphviz_chart("""
+    digraph G {
+        rankdir=LR;
+        bgcolor="transparent";
+        node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=11];
+
+        A [label="Maritime Routes\n& Vessel DB", fillcolor="#e0f2fe"];
+        B [label="Hybrid Physics +\nXGBoost Surrogate", fillcolor="#dbeafe"];
+        C [label="Precomputed Grid Cache\n600-entry shared table", fillcolor="#c7d2fe"];
+        D [label="Optimization\nAlgorithms", fillcolor="#a5b4fc"];
+        E [label="1. Deterministic\nMILP HiGHS / Greedy", fillcolor="#86efac"];
+        F [label="2. Classical\nMetaheuristic: GA", fillcolor="#93c5fd"];
+        G [label="3. Quantum-Inspired\nSQA / QI-EA", fillcolor="#c4b5fd"];
+        H [label="SQLite Optimization\nRuns DB", fillcolor="#fde68a"];
+        I [label="Streamlit Dashboard\n(mode=ro)", fillcolor="#fca5a5"];
+
+        A -> B;
+        B -> C;
+        C -> D;
+        D -> E;
+        D -> F;
+        D -> G;
+        E -> H;
+        F -> H;
+        G -> H;
+        H -> I;
+    }
+    """, use_container_width=True)
 
     st.markdown("---")
 

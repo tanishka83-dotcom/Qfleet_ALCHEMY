@@ -65,10 +65,16 @@ def main() -> None:
 
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📋 System Info")
+    try:
+        from dashboard.data_loader import load_optimization_runs_audit
+        audit = load_optimization_runs_audit()
+        canonical_count = audit.get("canonical", "?")
+    except Exception:
+        canonical_count = "?"
     st.sidebar.info(
         "**SIH Problem ID**: SIH26138\n"
         "**DB Status**: SQLite (`mode=ro`)\n"
-        "**Benchmark Set**: 96 canonical runs\n"
+        f"**Benchmark Set**: {canonical_count} canonical runs\n"
         "**Optimizer Engine**: HiGHS / GA / SQA / QI-EA"
     )
 

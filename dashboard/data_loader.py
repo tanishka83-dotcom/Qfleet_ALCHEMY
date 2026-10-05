@@ -23,6 +23,7 @@ from typing import Any
 _ROOT = pathlib.Path(__file__).parent.parent
 DB_PATH = _ROOT / "data" / "qfleet.db"
 CSV_PATH = _ROOT / "data" / "benchmark_results.csv"
+STAT_CSV_PATH = _ROOT / "results" / "statistical_tests.csv"
 
 
 def get_ro_connection() -> sqlite3.Connection:
@@ -71,6 +72,13 @@ def load_benchmark_csv() -> pd.DataFrame:
     if not CSV_PATH.exists():
         raise FileNotFoundError(f"Missing benchmark results CSV at {CSV_PATH}")
     return pd.read_csv(CSV_PATH)
+
+
+def load_statistical_tests() -> pd.DataFrame:
+    """Loads Wilcoxon / Mann-Whitney results from results/statistical_tests.csv."""
+    if not STAT_CSV_PATH.exists():
+        return pd.DataFrame()
+    return pd.read_csv(STAT_CSV_PATH)
 
 
 def load_optimization_runs_audit() -> dict[str, Any]:
